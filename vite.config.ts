@@ -9,6 +9,24 @@ export default defineConfig({
     // Tailwind is not being actively used – do not remove them
     react(),
     tailwindcss(),
+    {
+      name: 'spa-fallback-admin-routes',
+      configureServer(server) {
+        return () => {
+          server.middlewares.use((req, _res, next) => {
+            const url = req.url?.split('?')[0] ?? '';
+            if (
+              /^\/AdminDashboard\/?$/i.test(url) ||
+              url === '/settings' ||
+              url === '/settings/'
+            ) {
+              req.url = '/index.html';
+            }
+            next();
+          });
+        };
+      },
+    },
   ],
   resolve: {
     alias: {

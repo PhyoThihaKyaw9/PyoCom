@@ -1,5 +1,5 @@
 import { Outlet, Link, useLocation } from "react-router";
-import { Home, BookOpen, Camera, Users, Settings } from "lucide-react";
+import { Home, BookOpen, Camera, Library, Settings } from "lucide-react";
 
 export function Layout() {
   const location = useLocation();
@@ -8,7 +8,7 @@ export function Layout() {
     { path: "/", icon: Home, label: "ပင်မ", labelEn: "Home" },
     { path: "/paddy", icon: BookOpen, label: "လမ်းညွှန်", labelEn: "Guide" },
     { path: "/scanner", icon: Camera, label: "စကင်န်", labelEn: "Scan" },
-    { path: "/community", icon: Users, label: "လူမှု", labelEn: "Community" },
+    { path: "/community", icon: Library, label: "ဉာဏ်မျှဝေ", labelEn: "Knowledge" },
     { path: "/settings", icon: Settings, label: "ဆက်တင်", labelEn: "Settings" },
   ];
 
