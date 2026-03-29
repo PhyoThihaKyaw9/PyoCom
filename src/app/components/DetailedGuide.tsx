@@ -1,5 +1,6 @@
 import { useState } from "react";
 import {
+  AlertTriangle,
   BookOpen,
   Check,
   ChevronLeft,
@@ -38,6 +39,8 @@ export function DetailedGuide({ onBack, paddyType = "shwebo-pawsan" }: DetailedG
   const [hasVoted, setHasVoted] = useState<"up" | "down" | null>(null);
 
   const guide = getDetailedGuideForPaddyType(paddyType);
+  const ws = guide.weatherSoil;
+  const sh = guide.sectionHeadings;
 
   return (
     <div className="min-h-dvh overflow-x-hidden bg-[#F8FAFC] pb-8">
@@ -76,28 +79,53 @@ export function DetailedGuide({ onBack, paddyType = "shwebo-pawsan" }: DetailedG
         <Card className="border-4 border-gray-300">
           <CardContent className="p-4 sm:p-6">
             <h2 className="mb-4 text-xl font-bold text-gray-900 sm:mb-6 sm:text-2xl">
-              ရာသီဥတုနှင့် မြေဆီလွှာ
+              {sh?.weatherMM ?? "ရာသီဥတုနှင့် မြေဆီလွှာ"}
             </h2>
-            <p className="mb-4 text-base text-gray-600 sm:mb-6 sm:text-lg">Weather & Soil Conditions</p>
+            <p className="mb-4 text-base text-gray-600 sm:mb-6 sm:text-lg">
+              {sh?.weatherEn ?? "Weather & Soil Conditions"}
+            </p>
 
             <div className="space-y-4">
-              <div className="p-4 bg-[#FEF3C7] rounded-xl border-2 border-[#FDB813]">
-                <div className="flex items-center gap-3 mb-2">
+              <div className="rounded-xl border-2 border-[#FDB813] bg-[#FEF3C7] p-4">
+                <div className="mb-2 flex items-center gap-3">
                   <Thermometer className="size-8 shrink-0 text-amber-700" strokeWidth={2.2} aria-hidden />
                   <h3 className="text-xl font-bold text-gray-900">အပူချိန်</h3>
                 </div>
-                <p className="text-lg text-gray-900">၂၅-၃၅°C အကောင်းဆုံး</p>
-                <p className="text-base text-gray-600">Optimal: 25-35°C</p>
+                <p className="text-lg text-gray-900">
+                  {ws?.tempMM ?? "၂၅-၃၅°C အကောင်းဆုံး"}
+                </p>
+                <p className="text-base text-gray-600">
+                  {ws?.tempEn ?? "Optimal: 25-35°C"}
+                </p>
               </div>
 
-              <div className="p-4 bg-[#E0F2FE] rounded-xl border-2 border-[#0EA5E9]">
-                <div className="flex items-center gap-3 mb-2">
+              <div className="rounded-xl border-2 border-[#0EA5E9] bg-[#E0F2FE] p-4">
+                <div className="mb-2 flex items-center gap-3">
                   <Droplets className="size-8 shrink-0 text-sky-600" strokeWidth={2.2} aria-hidden />
                   <h3 className="text-xl font-bold text-gray-900">မြေဆီ pH</h3>
                 </div>
-                <p className="text-lg text-gray-900">pH 5.5-6.5 လိုအပ်သည်</p>
-                <p className="text-base text-gray-600">Required: pH 5.5-6.5</p>
+                <p className="text-lg text-gray-900">
+                  {ws?.phMM ?? "pH 5.5-6.5 လိုအပ်သည်"}
+                </p>
+                <p className="text-base text-gray-600">
+                  {ws?.phEn ?? "Required: pH 5.5-6.5"}
+                </p>
               </div>
+
+              {(ws?.soilTypeMM || ws?.soilTypeEn) && (
+                <div className="rounded-xl border-2 border-[#16a34a] bg-[#f0fdf4] p-4">
+                  <div className="mb-2 flex items-center gap-3 text-[#16a34a]">
+                    <Leaf className="size-8 shrink-0" strokeWidth={2.2} aria-hidden />
+                    <h3 className="text-xl font-bold text-gray-900">မြေအမျိုးအစား</h3>
+                  </div>
+                  {ws.soilTypeMM ? (
+                    <p className="text-lg text-gray-900">{ws.soilTypeMM}</p>
+                  ) : null}
+                  {ws.soilTypeEn ? (
+                    <p className="text-base text-gray-600">{ws.soilTypeEn}</p>
+                  ) : null}
+                </div>
+              )}
             </div>
           </CardContent>
         </Card>
@@ -106,9 +134,22 @@ export function DetailedGuide({ onBack, paddyType = "shwebo-pawsan" }: DetailedG
         <Card className="border-4 border-gray-300">
           <CardContent className="p-4 sm:p-6">
             <h2 className="mb-4 text-xl font-bold text-gray-900 sm:mb-6 sm:text-2xl">
-              စိုက်ပျိုးချိန်ဇယား
+              {sh?.timelineMM ?? "စိုက်ပျိုးချိန်ဇယား"}
             </h2>
-            <p className="mb-4 text-base text-gray-600 sm:mb-6 sm:text-lg">Growing Timeline</p>
+            <p className="mb-4 text-base text-gray-600 sm:mb-6 sm:text-lg">
+              {sh?.timelineEn ?? "Growing Timeline"}
+            </p>
+
+            {(guide.growingDurationMM || guide.growingDurationEn) && (
+              <div className="mb-5 rounded-xl border-2 border-[#16a34a]/35 bg-[#f0fdf4] p-4">
+                {guide.growingDurationMM ? (
+                  <p className="font-semibold text-[#1B4332]">{guide.growingDurationMM}</p>
+                ) : null}
+                {guide.growingDurationEn ? (
+                  <p className="mt-1 text-sm text-gray-700">{guide.growingDurationEn}</p>
+                ) : null}
+              </div>
+            )}
 
             <div className="space-y-6">
               {guide.timeline.map((stage, index) => (
@@ -123,10 +164,24 @@ export function DetailedGuide({ onBack, paddyType = "shwebo-pawsan" }: DetailedG
                     </div>
                     <h3 className="text-xl font-bold text-gray-900 mb-1">{stage.stage}</h3>
                     <p className="text-base text-gray-600 mb-2">{stage.stageEn}</p>
-                    <p className="flex items-start gap-2 text-base font-medium text-gray-900">
-                      <Lightbulb className="mt-0.5 size-5 shrink-0 text-amber-600" strokeWidth={2.2} aria-hidden />
-                      <span>{stage.tip}</span>
-                    </p>
+                    {stage.tipMM && stage.tipEn ? (
+                      <div className="space-y-2">
+                        <p className="flex items-start gap-2 text-base font-medium text-gray-900">
+                          <Lightbulb
+                            className="mt-0.5 size-5 shrink-0 text-amber-600"
+                            strokeWidth={2.2}
+                            aria-hidden
+                          />
+                          <span>{stage.tipMM}</span>
+                        </p>
+                        <p className="pl-7 text-base text-gray-600 leading-relaxed">{stage.tipEn}</p>
+                      </div>
+                    ) : (
+                      <p className="flex items-start gap-2 text-base font-medium text-gray-900">
+                        <Lightbulb className="mt-0.5 size-5 shrink-0 text-amber-600" strokeWidth={2.2} aria-hidden />
+                        <span>{stage.tip}</span>
+                      </p>
+                    )}
                   </div>
                 </div>
               ))}
@@ -138,9 +193,11 @@ export function DetailedGuide({ onBack, paddyType = "shwebo-pawsan" }: DetailedG
         <Card className="border-4 border-gray-300">
           <CardContent className="p-4 sm:p-6">
             <h2 className="mb-4 text-xl font-bold text-gray-900 sm:mb-6 sm:text-2xl">
-              လုပ်ဆောင်ရမည့် အဆင့်များ
+              {sh?.howToMM ?? "လုပ်ဆောင်ရမည့် အဆင့်များ"}
             </h2>
-            <p className="mb-4 text-base text-gray-600 sm:mb-6 sm:text-lg">Step-by-Step Instructions</p>
+            <p className="mb-4 text-base text-gray-600 sm:mb-6 sm:text-lg">
+              {sh?.howToEn ?? "Step-by-Step Instructions"}
+            </p>
 
             <div className="space-y-4">
               {guide.howToSteps.map((item, index) => (
@@ -164,9 +221,11 @@ export function DetailedGuide({ onBack, paddyType = "shwebo-pawsan" }: DetailedG
         <Card className="border-4 border-[#78350f] bg-[#FEF3C7]">
           <CardContent className="p-4 sm:p-6">
             <h2 className="mb-4 text-xl font-bold text-gray-900 sm:mb-6 sm:text-2xl">
-              မြေသြဇာအချိန်ဇယား
+              {sh?.fertilizerMM ?? "မြေသြဇာအချိန်ဇယား"}
             </h2>
-            <p className="mb-4 text-base text-gray-600 sm:mb-6 sm:text-lg">Fertilizer Schedule</p>
+            <p className="mb-4 text-base text-gray-600 sm:mb-6 sm:text-lg">
+              {sh?.fertilizerEn ?? "Fertilizer Schedule"}
+            </p>
 
             <div className="space-y-4">
               {guide.fertilizerSchedule.map((row, index) => (
@@ -179,6 +238,16 @@ export function DetailedGuide({ onBack, paddyType = "shwebo-pawsan" }: DetailedG
                   <p className="text-base text-gray-600">{row.detailEn}</p>
                 </div>
               ))}
+              {(guide.fertilizerFootnoteMM || guide.fertilizerFootnoteEn) && (
+                <div className="rounded-xl border-2 border-dashed border-[#78350f]/60 bg-white/90 p-4">
+                  {guide.fertilizerFootnoteMM ? (
+                    <p className="font-medium text-gray-900">{guide.fertilizerFootnoteMM}</p>
+                  ) : null}
+                  {guide.fertilizerFootnoteEn ? (
+                    <p className="mt-1 text-sm text-gray-600">{guide.fertilizerFootnoteEn}</p>
+                  ) : null}
+                </div>
+              )}
             </div>
           </CardContent>
         </Card>
@@ -187,9 +256,22 @@ export function DetailedGuide({ onBack, paddyType = "shwebo-pawsan" }: DetailedG
         <Card className="border-4 border-[#E67E22] bg-[#FEF3C7]">
           <CardContent className="p-4 sm:p-6">
             <h2 className="mb-4 text-xl font-bold text-gray-900 sm:mb-6 sm:text-2xl">
-              ပိုးမွှားကာကွယ်ရေး
+              {sh?.pestMM ?? "ပိုးမွှားကာကွယ်ရေး"}
             </h2>
-            <p className="mb-4 text-base text-gray-600 sm:mb-6 sm:text-lg">Pest Protection & Prevention</p>
+            <p className="mb-4 text-base text-gray-600 sm:mb-6 sm:text-lg">
+              {sh?.pestEn ?? "Pest Protection & Prevention"}
+            </p>
+
+            {(guide.pestIntroMM || guide.pestIntroEn) && (
+              <div className="mb-4 rounded-lg border border-[#E67E22]/40 bg-white/80 px-3 py-2">
+                {guide.pestIntroMM ? (
+                  <p className="font-semibold text-gray-900">{guide.pestIntroMM}</p>
+                ) : null}
+                {guide.pestIntroEn ? (
+                  <p className="text-sm text-gray-600">{guide.pestIntroEn}</p>
+                ) : null}
+              </div>
+            )}
 
             <div className="space-y-4">
               {guide.pestRows.map((item, index) => (
@@ -204,14 +286,42 @@ export function DetailedGuide({ onBack, paddyType = "shwebo-pawsan" }: DetailedG
                 </div>
               ))}
 
-              <div className="p-4 bg-[#f0fdf4] rounded-xl border-2 border-[#16a34a] mt-4">
-                <div className="flex items-center gap-3 mb-2 text-[#16a34a]">
+              <div className="mt-4 rounded-xl border-2 border-[#16a34a] bg-[#f0fdf4] p-4">
+                <div className="mb-2 flex items-center gap-3 text-[#16a34a]">
                   <Leaf className="size-8 shrink-0" strokeWidth={2.2} aria-hidden />
-                  <h3 className="text-xl font-bold text-[#16a34a]">သဘာဝနည်းလမ်း</h3>
+                  <div className="min-w-0">
+                    <h3 className="text-xl font-bold text-[#16a34a]">
+                      {guide.naturalHeadingMM ?? "သဘာဝနည်းလမ်း"}
+                    </h3>
+                    {guide.naturalHeadingEn ? (
+                      <p className="text-sm font-medium text-[#166534]/90">{guide.naturalHeadingEn}</p>
+                    ) : null}
+                  </div>
                 </div>
-                <p className="text-lg text-gray-900 mb-1">{guide.naturalTipMM}</p>
+                <p className="mb-1 text-lg text-gray-900">{guide.naturalTipMM}</p>
                 <p className="text-base text-gray-600">{guide.naturalTipEn}</p>
               </div>
+
+              {(guide.pestImportantMM || guide.pestImportantEn) && (
+                <div
+                  className="flex gap-3 rounded-xl border-2 border-amber-400 bg-amber-50 p-4"
+                  role="note"
+                >
+                  <AlertTriangle
+                    className="mt-0.5 size-6 shrink-0 text-amber-700"
+                    strokeWidth={2.2}
+                    aria-hidden
+                  />
+                  <div className="min-w-0 space-y-2">
+                    {guide.pestImportantMM ? (
+                      <p className="text-base text-gray-900">{guide.pestImportantMM}</p>
+                    ) : null}
+                    {guide.pestImportantEn ? (
+                      <p className="text-sm text-gray-700">{guide.pestImportantEn}</p>
+                    ) : null}
+                  </div>
+                </div>
+              )}
             </div>
           </CardContent>
         </Card>

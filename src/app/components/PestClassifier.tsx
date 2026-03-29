@@ -1,11 +1,10 @@
 import { useState } from "react";
 import {
   AlertTriangle,
-  BookOpen,
-  Bug,
   Camera,
   Check,
   Pill,
+  Sprout,
   X,
 } from "lucide-react";
 import { MOCK_PEST_SCAN_RESULT, type PestScanResult } from "../../mocks";
@@ -51,7 +50,7 @@ export function PestClassifier() {
             </div>
             <div className="min-w-0">
               <h1 className="text-xl font-bold tracking-wide sm:text-3xl">
-                AI ပိုးမွှားခွဲခြားစနစ်
+                AI အပင်ရောဂါပိုးခွဲခြားစနစ်
               </h1>
               <p className="mt-1 text-sm opacity-90 sm:text-base">AI Pest Classifier</p>
             </div>
@@ -67,7 +66,7 @@ export function PestClassifier() {
 
           <div className="space-y-2 text-center sm:space-y-3">
             <h2 className="text-xl font-bold text-gray-900 sm:text-3xl">
-              ပိုးမွှားကို စကင်ဖတ်ပါ
+            အပင်ရောဂါပိုးကို စကင်ဖတ်ပါ
             </h2>
             <p className="text-base text-gray-600 sm:text-xl">Scan a Pest</p>
           </div>
@@ -81,7 +80,7 @@ export function PestClassifier() {
                 </div>
                 <div className="min-w-0">
                   <p className="mb-1 text-base font-bold text-gray-900 sm:text-xl">
-                    ပိုးမွှားကို အနီးကပ်ရိုက်ပါ
+                    အပင်ရောဂါပိုးကို အနီးကပ်ရိုက်ပါ
                   </p>
                   <p className="text-sm text-gray-600 sm:text-lg">Take a close-up photo of the pest</p>
                 </div>
@@ -114,7 +113,7 @@ export function PestClassifier() {
             className="h-16 w-full max-w-lg gap-2 border-4 border-[#15803d] bg-[#16a34a] text-base font-bold hover:bg-[#15803d] sm:h-20 sm:gap-3 sm:text-2xl"
           >
             <Camera className="size-6 shrink-0 sm:size-8" strokeWidth={2.2} aria-hidden />
-            ပိုးမွှားခွဲခြားရန် (Identify Pest)
+            အပင်ရောဂါပိုးခွဲခြားရန် (Identify Pest)
           </Button>
         </div>
       </div>
@@ -145,7 +144,7 @@ export function PestClassifier() {
           {/* Instruction Text */}
           {!scanning && !result && (
             <div className="absolute left-0 right-0 top-20 px-4 text-center text-white sm:top-24 sm:px-6">
-              <p className="mb-1 text-lg font-bold sm:mb-2 sm:text-2xl">ပိုးမွှားကို ဘောင်အတွင်းထည့်ပါ</p>
+              <p className="mb-1 text-lg font-bold sm:mb-2 sm:text-2xl">အပင်ရောဂါပိုးကို ဘောင်အတွင်းထည့်ပါ</p>
               <p className="text-sm sm:text-lg">Place pest inside the frame</p>
             </div>
           )}
@@ -186,9 +185,9 @@ export function PestClassifier() {
                 </Badge>
               </div>
 
-              {/* Large Pest Photo Placeholder */}
+              {/* Placeholder after scan — plant motif (affected crop context) */}
               <div className="w-full h-48 bg-gradient-to-br from-gray-100 to-gray-200 rounded-2xl mb-6 flex items-center justify-center border-2 border-gray-300 text-[#1B4332]">
-                <Bug className="size-24" strokeWidth={1.5} aria-hidden />
+                <Sprout className="size-24" strokeWidth={1.5} aria-hidden />
               </div>
 
               {/* Pest Name */}
@@ -223,14 +222,6 @@ export function PestClassifier() {
 
               {/* Action Buttons */}
               <div className="space-y-4">
-                <Button 
-                  className="w-full h-16 bg-[#16a34a] hover:bg-[#15803d] text-xl font-bold border-4 border-[#15803d]"
-                  onClick={() => alert("Verify via Knowledge tab or extension (demo — coming soon)")}
-                >
-                  <BookOpen className="w-7 h-7 mr-2 shrink-0" strokeWidth={2.5} />
-                  ဉာဏ်မျှဝေရေးတွင် စစ်ဆေးရန်
-                </Button>
-                
                 <div className="grid grid-cols-2 gap-4">
                   <Button 
                     onClick={handleRetake}

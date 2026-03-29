@@ -54,6 +54,9 @@ export interface GrowingTimelineStage {
   stage: string;
   stageEn: string;
   tip: string;
+  /** When set (with tipEn), DetailedGuide shows Myanmar and English on separate lines. */
+  tipMM?: string;
+  tipEn?: string;
 }
 
 export interface HowToStep {
@@ -79,6 +82,30 @@ export interface PestTreatmentRow {
   treatmentEn: string;
 }
 
+/** Optional weather/soil body; when set, DetailedGuide uses this instead of defaults. */
+export interface WeatherSoilContent {
+  tempMM: string;
+  tempEn: string;
+  phMM: string;
+  phEn: string;
+  soilTypeMM?: string;
+  soilTypeEn?: string;
+}
+
+/** Optional H2 + subtitle; use for variety-specific labels (e.g. emoji + EN subtitle). */
+export interface GuideSectionHeadings {
+  weatherMM?: string;
+  weatherEn?: string;
+  timelineMM?: string;
+  timelineEn?: string;
+  howToMM?: string;
+  howToEn?: string;
+  fertilizerMM?: string;
+  fertilizerEn?: string;
+  pestMM?: string;
+  pestEn?: string;
+}
+
 export interface DetailedGuideContent {
   title: string;
   titleEn: string;
@@ -91,6 +118,19 @@ export interface DetailedGuideContent {
   pestRows: PestTreatmentRow[];
   naturalTipMM: string;
   naturalTipEn: string;
+  weatherSoil?: WeatherSoilContent;
+  sectionHeadings?: GuideSectionHeadings;
+  /** Shown under the growing-timeline section title (e.g. total crop duration). */
+  growingDurationMM?: string;
+  growingDurationEn?: string;
+  fertilizerFootnoteMM?: string;
+  fertilizerFootnoteEn?: string;
+  pestIntroMM?: string;
+  pestIntroEn?: string;
+  naturalHeadingMM?: string;
+  naturalHeadingEn?: string;
+  pestImportantMM?: string;
+  pestImportantEn?: string;
 }
 
 export interface PestScanResult {

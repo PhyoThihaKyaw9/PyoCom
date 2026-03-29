@@ -69,7 +69,7 @@ export function CommunityFeed() {
             <Library className="size-5 sm:size-6" />
           </div>
           <div className="min-w-0">
-            <h1 className="text-xl font-bold tracking-wide sm:text-2xl">ဉာဏ်မျှဝေရေး</h1>
+            <h1 className="text-xl font-bold tracking-wide sm:text-2xl">သုတမျှဝေရေး</h1>
             <p className="text-xs opacity-90 sm:text-sm">Knowledge from extension &amp; admins</p>
           </div>
         </div>

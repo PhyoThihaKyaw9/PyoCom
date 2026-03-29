@@ -10,7 +10,12 @@ import { Button } from "./ui/button";
 import { Card, CardContent } from "./ui/card";
 import { Input } from "./ui/input";
 import { Label } from "./ui/label";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "./ui/tabs";
+
+type SignupPhase = "phone" | "otp" | "details";
+
+function generateMockOtp(): string {
+  return String(Math.floor(100000 + Math.random() * 900000));
+}
 
 const errMessage = (code: string) => {
   if (code === "PHONE_TAKEN")
@@ -28,52 +33,60 @@ const errMessage = (code: string) => {
       mm: "အမည် ထည့်ပါ",
       en: "Please enter your name.",
     };
-  if (code === "WEAK_PASSWORD")
-    return {
-      mm: "စကားဝေါ် အနည်းဆုံး ၆ လုံး",
-      en: "Password must be at least 6 characters.",
-    };
-  if (code === "INVALID_CREDENTIALS")
-    return {
-      mm: "အမည်၊ ဖုန်းနံပါတ် သို့မဟုတ် စကားဝေါ် မမှန်ကန်ပါ",
-      en: "Name, phone, or password is incorrect.",
-    };
   return { mm: "တစ်ခုခု မှားယွင်းနေပါသည်", en: "Something went wrong." };
 };
 
 export function AuthScreen() {
-  const { signIn, signUp } = useAuth();
-  const [tab, setTab] = useState<"login" | "signup">("login");
-
-  const [loginName, setLoginName] = useState("");
-  const [loginPhone, setLoginPhone] = useState("");
-  const [loginPassword, setLoginPassword] = useState("");
+  const { signUp } = useAuth();
 
   const [suName, setSuName] = useState("");
   const [suPhone, setSuPhone] = useState("");
-  const [suPassword, setSuPassword] = useState("");
-  const [suConfirm, setSuConfirm] = useState("");
 
-  const handleLogin = async (e: React.FormEvent) => {
-    e.preventDefault();
-    const digits = normalizePhone(loginPhone);
-    if (!loginName.trim() || !isValidPhoneDigits(digits) || !loginPassword) {
-      toast.error("All fields required", {
-        description: "အမည်၊ ဖုန်းနံပါတ်၊ စကားဝေါ် ထည့်ပါ",
+  const [signupPhase, setSignupPhase] = useState<SignupPhase>("phone");
+  const [pendingOtp, setPendingOtp] = useState("");
+  const [otpInput, setOtpInput] = useState("");
+
+  const requestSignupOtp = () => {
+    const digits = normalizePhone(suPhone);
+    if (!isValidPhoneDigits(digits)) {
+      toast.error("Invalid phone number", {
+        description: "ဖုန်းနံပါတ် ၈ လုံးမှ ၁၅ လုံးအထိ ထည့်ပါ",
       });
       return;
     }
-    try {
-      await signIn(loginName, loginPhone, loginPassword);
-      toast.success("Welcome back", { description: "ပြန်လည်ကြိုဆိုပါသည်" });
-    } catch (e) {
-      const m = errMessage((e as Error).message);
-      toast.error(m.en, { description: m.mm });
+    const pin = generateMockOtp();
+    setPendingOtp(pin);
+    setOtpInput("");
+    setSignupPhase("otp");
+    toast.success("ဒေမို OTP · Mock SMS", {
+      description: `PIN: ${pin}`,
+      duration: 25_000,
+    });
+  };
+
+  const verifySignupOtp = () => {
+    const entered = otpInput.replace(/\D/g, "");
+    if (entered.length !== 6) {
+      toast.error("Invalid OTP", {
+        description: "ဂဏန်း ၆ လုံး ထည့်ပါ",
+      });
+      return;
     }
+    if (entered !== pendingOtp) {
+      toast.error("OTP မမှန်ပါ", {
+        description: "ပြန်စစ်ဆေးပြီး ထည့်ပါ",
+      });
+      return;
+    }
+    setSignupPhase("details");
+    toast.success("OTP အောင်မြင်ပါပြီ", {
+      description: "အမည် ထည့်ပြီး အကောင့်ဖွင့်ပါ",
+    });
   };
 
   const handleSignup = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (signupPhase !== "details") return;
     if (!suName.trim()) {
       toast.error("Name required", { description: "အမည် ထည့်ပါ" });
       return;
@@ -85,20 +98,8 @@ export function AuthScreen() {
       });
       return;
     }
-    if (suPassword.length < 6) {
-      toast.error("Password too short", {
-        description: "စကားဝေါ် အနည်းဆုံး ၆ လုံး",
-      });
-      return;
-    }
-    if (suPassword !== suConfirm) {
-      toast.error("Passwords do not match", {
-        description: "စကားဝေါ်များ မတူညီပါ",
-      });
-      return;
-    }
     try {
-      await signUp(suName, suPhone, suPassword);
+      await signUp(suName, suPhone);
       toast.success("Account created", {
         description: "အကောင့်ဖွင့်ပြီးပါပြီ",
       });
@@ -122,7 +123,7 @@ export function AuthScreen() {
           <p className="text-white/85 text-sm">
             စပါးစိုက်ပျိုးသူများ အတွက်
             <span className="block text-xs opacity-80 mt-1">
-              For paddy growers — sign in to continue
+              For paddy growers — register to continue
             </span>
           </p>
         </div>
@@ -131,167 +132,153 @@ export function AuthScreen() {
       <div className="mx-auto w-full max-w-md flex-1 px-4 py-6 pb-[max(1.5rem,env(safe-area-inset-bottom))]">
         <Card className="border-4 border-[#1B4332]/20 shadow-xl">
           <CardContent className="p-5 pt-6">
-            <Tabs
-              value={tab}
-              onValueChange={(v) => setTab(v as "login" | "signup")}
-              className="w-full"
-            >
-              <TabsList className="grid w-full grid-cols-2 h-12 mb-6 bg-[#e8f5e9] p-1 rounded-xl">
-                <TabsTrigger
-                  value="login"
-                  className="rounded-lg data-[state=active]:bg-[#16a34a] data-[state=active]:text-white text-[#1B4332] font-semibold"
-                >
-                  ဝင်ရောက်
-                  <span className="block text-[10px] font-normal opacity-80">
-                    Log in
-                  </span>
-                </TabsTrigger>
-                <TabsTrigger
-                  value="signup"
-                  className="rounded-lg data-[state=active]:bg-[#16a34a] data-[state=active]:text-white text-[#1B4332] font-semibold"
-                >
-                  အကောင့်ဖွင့်မည်
-                  <span className="block text-[10px] font-normal opacity-80">
-                    Sign up
-                  </span>
-                </TabsTrigger>
-              </TabsList>
+            <h2 className="text-lg font-bold text-[#1B4332] mb-5 text-center">
+              အကောင့်ဖွင့်မည်
+              <span className="block text-xs font-normal text-gray-600 mt-1">
+                Sign up
+              </span>
+            </h2>
+            <form onSubmit={handleSignup} className="space-y-4">
+                  {signupPhase === "phone" && (
+                    <>
+                      <div className="space-y-2">
+                        <Label htmlFor="su-phone" className="text-base">
+                          ဖုန်းနံပါတ်{" "}
+                          <span className="text-gray-500">Phone number</span>
+                        </Label>
+                        <Input
+                          id="su-phone"
+                          type="tel"
+                          inputMode="tel"
+                          autoComplete="tel"
+                          value={suPhone}
+                          onChange={(e) => setSuPhone(e.target.value)}
+                          className={fieldClass}
+                          placeholder="09 123 456 789"
+                        />
+                        <p className="text-xs text-gray-500">
+                          OTP တောင်းပြီးနောက် toast တွင် ဒေမို PIN ပေါ်လာပါမည်
+                          <span className="block">Mock OTP — PIN appears in toast</span>
+                        </p>
+                      </div>
+                      <div className="flex flex-col gap-2 sm:flex-row sm:gap-3">
+                        <Button
+                          type="button"
+                          variant="outline"
+                          className="h-12 flex-1 border-2 border-[#1B4332] text-[#1B4332] hover:bg-[#1B4332]/5"
+                          onClick={requestSignupOtp}
+                        >
+                          OTP တောင်းမည် · Request OTP
+                        </Button>
+                        <Button
+                          type="button"
+                          className="h-12 flex-1 text-base font-bold bg-[#16a34a] hover:bg-[#15803d] border-4 border-[#15803d]"
+                          onClick={requestSignupOtp}
+                        >
+                          ဆက်ရန်
+                        </Button>
+                      </div>
+                    </>
+                  )}
 
-              <TabsContent value="login" className="mt-0">
-                <form onSubmit={handleLogin} className="space-y-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="login-name" className="text-base">
-                      အမည် <span className="text-gray-500">Your name</span>
-                    </Label>
-                    <Input
-                      id="login-name"
-                      autoComplete="name"
-                      value={loginName}
-                      onChange={(e) => setLoginName(e.target.value)}
-                      className={fieldClass}
-                      placeholder="ဦးလှမြင့်"
-                    />
-                    <p className="text-xs text-gray-500">
-                      စာရင်းသွင်းစဉ် သုံးခဲ့သည့်အမည် အတိုင်းထည့်ပါ
-                      <span className="block">Same spelling as when you signed up</span>
-                    </p>
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="login-phone" className="text-base">
-                      ဖုန်းနံပါတ်{" "}
-                      <span className="text-gray-500">Phone number</span>
-                    </Label>
-                    <Input
-                      id="login-phone"
-                      type="tel"
-                      inputMode="tel"
-                      autoComplete="tel"
-                      value={loginPhone}
-                      onChange={(e) => setLoginPhone(e.target.value)}
-                      className={fieldClass}
-                      placeholder="09 123 456 789"
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="login-password" className="text-base">
-                      စကားဝေါ် <span className="text-gray-500">Password</span>
-                    </Label>
-                    <Input
-                      id="login-password"
-                      type="password"
-                      autoComplete="current-password"
-                      value={loginPassword}
-                      onChange={(e) => setLoginPassword(e.target.value)}
-                      className={fieldClass}
-                    />
-                  </div>
-                  <Button
-                    type="submit"
-                    className="w-full h-14 text-lg font-bold bg-[#16a34a] hover:bg-[#15803d] border-4 border-[#15803d]"
-                  >
-                    ဝင်ရောက်မည်
-                  </Button>
-                </form>
-              </TabsContent>
+                  {signupPhase === "otp" && (
+                    <div className="space-y-4">
+                      <div className="rounded-xl border-2 border-[#16a34a]/40 bg-[#f0fdf4] p-3 text-sm text-[#166534]">
+                        ဖုန်းနံပါတ် <span className="font-mono font-semibold">{suPhone}</span>
+                        သို့ ဒေမို OTP ပို့ပြီးပါပြီ။ Toast ရှိ PIN ထည့်ပါ။
+                      </div>
+                      <div className="space-y-2">
+                        <Label htmlFor="su-otp" className="text-base">
+                          OTP ဂဏန်း <span className="text-gray-500">6-digit PIN</span>
+                        </Label>
+                        <Input
+                          id="su-otp"
+                          type="text"
+                          inputMode="numeric"
+                          autoComplete="one-time-code"
+                          maxLength={6}
+                          value={otpInput}
+                          onChange={(e) =>
+                            setOtpInput(e.target.value.replace(/\D/g, "").slice(0, 6))
+                          }
+                          className={`${fieldClass} text-center font-mono text-2xl tracking-[0.35em]`}
+                          placeholder="••••••"
+                        />
+                      </div>
+                      <div className="flex flex-col gap-2 sm:flex-row sm:gap-3">
+                        <Button
+                          type="button"
+                          variant="outline"
+                          className="h-12 flex-1 border-2 border-gray-300"
+                          onClick={() => {
+                            setSignupPhase("phone");
+                            setPendingOtp("");
+                            setOtpInput("");
+                          }}
+                        >
+                          နောက်သို့
+                        </Button>
+                        <Button
+                          type="button"
+                          className="h-12 flex-1 font-bold bg-[#16a34a] hover:bg-[#15803d] border-4 border-[#15803d]"
+                          onClick={verifySignupOtp}
+                        >
+                          အတည်ပြုရန် · Verify
+                        </Button>
+                      </div>
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        className="w-full text-sm text-[#1B4332] underline-offset-2 hover:underline"
+                        onClick={requestSignupOtp}
+                      >
+                        OTP ပြန်ပို့မည် · Resend (new PIN)
+                      </Button>
+                    </div>
+                  )}
 
-              <TabsContent value="signup" className="mt-0">
-                <form onSubmit={handleSignup} className="space-y-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="su-name" className="text-base">
-                      အမည် <span className="text-gray-500">Display name</span>
-                    </Label>
-                    <Input
-                      id="su-name"
-                      autoComplete="name"
-                      value={suName}
-                      onChange={(e) => setSuName(e.target.value)}
-                      className={fieldClass}
-                      placeholder="ဦးလှမြင့်"
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="su-phone" className="text-base">
-                      ဖုန်းနံပါတ်{" "}
-                      <span className="text-gray-500">Phone number</span>
-                    </Label>
-                    <Input
-                      id="su-phone"
-                      type="tel"
-                      inputMode="tel"
-                      autoComplete="tel"
-                      value={suPhone}
-                      onChange={(e) => setSuPhone(e.target.value)}
-                      className={fieldClass}
-                      placeholder="09 123 456 789"
-                    />
-                    <p className="text-xs text-gray-500">
-                      ၈ လုံးမှ ၁၅ လုံး / 8–15 digits (spaces optional)
-                    </p>
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="su-password" className="text-base">
-                      စကားဝေါ် <span className="text-gray-500">Password</span>
-                    </Label>
-                    <Input
-                      id="su-password"
-                      type="password"
-                      autoComplete="new-password"
-                      value={suPassword}
-                      onChange={(e) => setSuPassword(e.target.value)}
-                      className={fieldClass}
-                    />
-                    <p className="text-xs text-gray-500">
-                      အနည်းဆုံး ၆ လုံး / At least 6 characters
-                    </p>
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="su-confirm" className="text-base">
-                      စကားဝေါ်အတည်ပြု{" "}
-                      <span className="text-gray-500">Confirm password</span>
-                    </Label>
-                    <Input
-                      id="su-confirm"
-                      type="password"
-                      autoComplete="new-password"
-                      value={suConfirm}
-                      onChange={(e) => setSuConfirm(e.target.value)}
-                      className={fieldClass}
-                    />
-                  </div>
-                  <Button
-                    type="submit"
-                    className="w-full h-14 text-lg font-bold bg-[#16a34a] hover:bg-[#15803d] border-4 border-[#15803d]"
-                  >
-                    အကောင့်ဖွင့်မည်
-                  </Button>
-                </form>
-              </TabsContent>
-            </Tabs>
+                  {signupPhase === "details" && (
+                    <>
+                      <div className="space-y-2">
+                        <Label htmlFor="su-name" className="text-base">
+                          အမည် <span className="text-gray-500">Display name</span>
+                        </Label>
+                        <Input
+                          id="su-name"
+                          autoComplete="name"
+                          value={suName}
+                          onChange={(e) => setSuName(e.target.value)}
+                          className={fieldClass}
+                          placeholder="ဦးလှမြင့်"
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <Label htmlFor="su-phone-ro" className="text-base">
+                          ဖုန်းနံပါတ်{" "}
+                          <span className="text-gray-500">Verified</span>
+                        </Label>
+                        <Input
+                          id="su-phone-ro"
+                          type="tel"
+                          readOnly
+                          value={suPhone}
+                          className={`${fieldClass} bg-gray-50 text-gray-700`}
+                        />
+                      </div>
+                      <Button
+                        type="submit"
+                        className="w-full h-14 text-lg font-bold bg-[#16a34a] hover:bg-[#15803d] border-4 border-[#15803d]"
+                      >
+                        အကောင့်ဖွင့်မည်
+                      </Button>
+                    </>
+                  )}
+            </form>
 
             <p className="text-xs text-center text-gray-500 mt-6 leading-relaxed">
-              ဝင်ရောက်ရန် အမည်၊ ဖုန်းနံပါတ်၊ စကားဝေါ် သုံးမျိုးစလုံး မှန်ကန်ရမည်။
+              ဖုန်းနံပါတ် OTP အောင်မြင်ပြီးမှ အမည် ထည့်ပါ။
               <span className="block mt-1">
-                Demo only — stored locally; passwords are not securely hashed.
+                Demo only — account data stays in this browser only.
               </span>
               <span className="block mt-2 text-[#166534]">
                 Demo admin: sign up with phone{" "}
