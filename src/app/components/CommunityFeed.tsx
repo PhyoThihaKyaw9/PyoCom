@@ -62,22 +62,20 @@ export function CommunityFeed() {
   );
 
   return (
-    <div className="min-h-screen bg-[#f0fdf4] pb-24">
-      <header className="bg-[#1B4332] text-white px-6 pt-8 pb-6 shadow-lg">
+    <div className="min-h-dvh overflow-x-hidden bg-[#f0fdf4] pb-24">
+      <header className="bg-[#1B4332] px-4 pb-5 pt-[max(1.5rem,env(safe-area-inset-top))] text-white shadow-lg sm:px-6 sm:pb-6 sm:pt-8">
         <div className="flex items-center gap-3">
-          <div className="w-11 h-11 bg-white/15 rounded-xl flex items-center justify-center">
-            <Library className="w-6 h-6" />
+          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-white/15 sm:h-11 sm:w-11">
+            <Library className="size-5 sm:size-6" />
           </div>
-          <div>
-            <h1 className="text-2xl font-bold tracking-wide">
-              ဉာဏ်မျှဝေရေး
-            </h1>
-            <p className="text-sm opacity-90">Knowledge from extension &amp; admins</p>
+          <div className="min-w-0">
+            <h1 className="text-xl font-bold tracking-wide sm:text-2xl">ဉာဏ်မျှဝေရေး</h1>
+            <p className="text-xs opacity-90 sm:text-sm">Knowledge from extension &amp; admins</p>
           </div>
         </div>
       </header>
 
-      <div className="px-4 py-4 space-y-4 max-w-lg mx-auto">
+      <div className="mx-auto max-w-lg space-y-4 px-4 py-4">
         <Card className="border-2 border-[#1B4332]/20">
           <CardContent className="p-4">
             <div className="flex items-start gap-2 mb-3">

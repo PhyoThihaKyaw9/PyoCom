@@ -13,15 +13,15 @@ export function Layout() {
   ];
 
   return (
-    <div className="flex flex-col h-screen bg-[#f0fdf4]">
+    <div className="flex min-h-dvh min-h-[100svh] flex-col bg-[#f0fdf4]">
       {/* Main Content */}
-      <main className="flex-1 overflow-y-auto pb-20">
+      <main className="min-h-0 flex-1 overflow-y-auto overflow-x-hidden pb-[calc(5rem+env(safe-area-inset-bottom,0px))]">
         <Outlet />
       </main>
 
       {/* Bottom Navigation */}
-      <nav className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 shadow-lg">
-        <div className="flex justify-around items-center h-20 max-w-md mx-auto">
+      <nav className="fixed bottom-0 left-0 right-0 z-40 border-t border-gray-200 bg-white pb-[env(safe-area-inset-bottom,0px)] shadow-lg">
+        <div className="mx-auto flex h-16 min-h-[4.5rem] w-full max-w-lg items-center justify-around sm:h-20">
           {navItems.map((item) => {
             const Icon = item.icon;
             const isActive = location.pathname === item.path;
@@ -36,9 +36,13 @@ export function Layout() {
                     : "text-gray-500 hover:text-[#16a34a]"
                 }`}
               >
-                <Icon className="w-6 h-6 mb-1" />
-                <span className="text-xs">{item.label}</span>
-                <span className="text-[10px] text-gray-400">{item.labelEn}</span>
+                <Icon className="mb-0.5 size-5 sm:mb-1 sm:size-6" />
+                <span className="max-w-[4.25rem] truncate text-center text-[11px] leading-tight sm:max-w-none sm:text-xs">
+                  {item.label}
+                </span>
+                <span className="hidden text-[10px] text-gray-400 sm:block">
+                  {item.labelEn}
+                </span>
               </Link>
             );
           })}

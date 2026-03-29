@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useLayoutEffect, useState } from 'react';
 import {
   Home,
   BookOpen,
@@ -43,8 +43,10 @@ export default function App() {
   const { user, ready } = useAuth();
   const [currentPage, setCurrentPage] = useState<AppPage>(initialPageFromPath);
   const [settingsTab, setSettingsTab] = useState<SettingsMainTab>('notifications');
+  const [guideDetailPaddyType, setGuideDetailPaddyType] = useState("shwebo-pawsan");
 
-  useEffect(() => {
+  /** Before paint: avoid empty main when admin page is invalid for current role. */
+  useLayoutEffect(() => {
     if (!ready || !user) return;
     if (currentPage === 'admin' && user.role !== 'admin') {
       setCurrentPage('home');
@@ -102,10 +104,16 @@ export default function App() {
   const navItems = user.role === 'admin' ? adminNav : farmerNav;
   const isFarmer = user.role !== 'admin';
 
+  /** Avoid blank main: admin URL/tab with non-admin user shows home until state syncs. */
+  const effectivePage: AppPage =
+    ready && user && user.role !== 'admin' && currentPage === 'admin'
+      ? 'home'
+      : currentPage;
+
   return (
-    <div className="flex flex-col h-screen bg-[#f0fdf4]">
-      <main className="flex-1 overflow-y-auto pb-20">
-        {currentPage === 'home' && (
+    <div className="flex min-h-dvh min-h-[100svh] flex-col bg-[#f0fdf4]">
+      <main className="min-h-0 flex-1 overflow-y-auto overflow-x-hidden pb-[calc(5rem+env(safe-area-inset-bottom,0px))]">
+        {effectivePage === 'home' && (
           <Dashboard
             variant={user.role === 'admin' ? 'admin' : 'farmer'}
             onNavigateToPest={() => setCurrentPage('scanner')}
@@ -117,28 +125,36 @@ export default function App() {
             onNavigateToAdmin={() => setCurrentPage('admin')}
           />
         )}
-        {currentPage === 'admin' && user.role === 'admin' && (
+        {effectivePage === 'admin' && user.role === 'admin' && (
           <AdminDashboard onBack={() => setCurrentPage('home')} />
         )}
-        {currentPage === 'paddy' && isFarmer && (
-          <PaddyInstructions onGuideClick={() => setCurrentPage('guide-detail')} />
+        {effectivePage === 'paddy' && isFarmer && (
+          <PaddyInstructions
+            onGuideClick={(paddyType) => {
+              setGuideDetailPaddyType(paddyType);
+              setCurrentPage('guide-detail');
+            }}
+          />
         )}
-        {currentPage === 'guide-detail' && isFarmer && (
-          <DetailedGuide onBack={() => setCurrentPage('paddy')} />
+        {effectivePage === 'guide-detail' && isFarmer && (
+          <DetailedGuide
+            paddyType={guideDetailPaddyType}
+            onBack={() => setCurrentPage('paddy')}
+          />
         )}
-        {currentPage === 'scanner' && isFarmer && <PestClassifier />}
-        {currentPage === 'community' && isFarmer && <CommunityFeed />}
-        {currentPage === 'settings' && (
+        {effectivePage === 'scanner' && isFarmer && <PestClassifier />}
+        {effectivePage === 'community' && isFarmer && <CommunityFeed />}
+        {effectivePage === 'settings' && (
           <NotificationSettings initialTab={settingsTab} />
         )}
       </main>
 
-      {currentPage !== 'guide-detail' && (
-        <nav className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 shadow-lg">
-          <div className="flex justify-around items-center h-20 max-w-md mx-auto">
+      {effectivePage !== 'guide-detail' && (
+        <nav className="fixed bottom-0 left-0 right-0 z-40 border-t border-gray-200 bg-white pb-[env(safe-area-inset-bottom,0px)] shadow-lg">
+          <div className="mx-auto flex h-16 min-h-[4.5rem] w-full max-w-lg items-center justify-around px-0 sm:h-20">
             {navItems.map((item) => {
               const Icon = item.icon;
-              const isActive = currentPage === item.id;
+              const isActive = effectivePage === item.id;
 
               return (
                 <button
@@ -156,9 +172,13 @@ export default function App() {
                       : "text-gray-500 hover:text-[#16a34a]"
                   }`}
                 >
-                  <Icon className="w-6 h-6 mb-1" />
-                  <span className="text-xs">{item.label}</span>
-                  <span className="text-[10px] text-gray-400">{item.labelEn}</span>
+                  <Icon className="mb-0.5 size-5 sm:mb-1 sm:size-6" />
+                  <span className="max-w-[4.25rem] truncate text-center text-[11px] leading-tight sm:max-w-none sm:text-xs">
+                    {item.label}
+                  </span>
+                  <span className="hidden text-[10px] text-gray-400 sm:block">
+                    {item.labelEn}
+                  </span>
                 </button>
               );
             })}

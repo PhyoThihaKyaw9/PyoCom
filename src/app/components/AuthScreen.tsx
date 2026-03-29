@@ -112,8 +112,8 @@ export function AuthScreen() {
     "h-12 text-base border-4 border-[#1B4332]/30 bg-white focus-visible:border-[#16a34a]";
 
   return (
-    <div className="min-h-screen bg-[#f0fdf4] flex flex-col">
-      <header className="bg-[#1B4332] text-white px-6 pt-10 pb-8 shadow-lg">
+    <div className="flex min-h-dvh min-h-[100svh] flex-col overflow-x-hidden bg-[#f0fdf4]">
+      <header className="bg-[#1B4332] px-4 pb-8 pt-[max(1.75rem,env(safe-area-inset-top))] text-white shadow-lg sm:px-6 sm:pt-10">
         <div className="flex flex-col items-center text-center gap-3 max-w-md mx-auto">
           <div className="w-16 h-16 rounded-2xl bg-white/15 flex items-center justify-center">
             <Sprout className="w-9 h-9" strokeWidth={2.2} />
@@ -128,7 +128,7 @@ export function AuthScreen() {
         </div>
       </header>
 
-      <div className="flex-1 px-4 py-6 max-w-md mx-auto w-full">
+      <div className="mx-auto w-full max-w-md flex-1 px-4 py-6 pb-[max(1.5rem,env(safe-area-inset-bottom))]">
         <Card className="border-4 border-[#1B4332]/20 shadow-xl">
           <CardContent className="p-5 pt-6">
             <Tabs

@@ -164,18 +164,18 @@ export function NotificationSettings({
     "h-11 text-base border-2 border-[#1B4332]/25 focus-visible:border-[#16a34a]";
 
   return (
-    <div className="min-h-screen bg-[#f0fdf4] pb-8">
-      <header className="bg-[#1B4332] text-white p-4 shadow-md">
-        <div className="flex items-center gap-2 max-w-lg mx-auto">
-          <Settings className="w-6 h-6 shrink-0" />
-          <div>
+    <div className="min-h-dvh overflow-x-hidden bg-[#f0fdf4] pb-8">
+      <header className="bg-[#1B4332] px-4 pb-4 pt-[max(1rem,env(safe-area-inset-top))] text-white shadow-md sm:p-4">
+        <div className="mx-auto flex max-w-lg items-center gap-2">
+          <Settings className="size-6 shrink-0" />
+          <div className="min-w-0">
             <h1 className="text-lg font-bold tracking-wide">ဆက်တင်များ</h1>
-            <p className="text-sm opacity-90">Settings · Account &amp; app</p>
+            <p className="text-xs opacity-90 sm:text-sm">Settings · Account &amp; app</p>
           </div>
         </div>
       </header>
 
-      <div className="p-4 max-w-lg mx-auto">
+      <div className="mx-auto max-w-lg px-3 py-3 sm:p-4">
         <Tabs value={mainTab} onValueChange={(v) => setMainTab(v as SettingsMainTab)}>
           <TabsList className="grid w-full grid-cols-3 h-auto p-1 bg-white border-2 border-[#1B4332]/20 rounded-xl mb-4">
             <TabsTrigger
@@ -228,7 +228,7 @@ export function NotificationSettings({
                 </div>
                 <div>
                   <Label htmlFor="profile-name">အမည် ပြင်ဆင်ရန်</Label>
-                  <div className="flex gap-2 mt-1">
+                  <div className="mt-1 flex flex-col gap-2 sm:flex-row">
                     <Input
                       id="profile-name"
                       value={nameEdit}
@@ -238,7 +238,7 @@ export function NotificationSettings({
                     />
                     <Button
                       type="button"
-                      className="shrink-0 bg-[#16a34a] hover:bg-[#15803d]"
+                      className="h-11 shrink-0 bg-[#16a34a] hover:bg-[#15803d] sm:h-auto"
                       onClick={() => void handleSaveName()}
                     >
                       သိမ်းမည်

@@ -2,15 +2,21 @@ import { Card, CardContent } from "./ui/card";
 import { Badge } from "./ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "./ui/select";
 import { useCallback, useEffect, useState } from "react";
-import { BookOpen, Plus, ThumbsDown, ThumbsUp, Check } from "lucide-react";
+import { BookOpen, Plus, Check } from "lucide-react";
 import { Button } from "./ui/button";
 import { mergeGuidesForFarmer } from "../../admin/contentAdminState";
-import { MOCK_GUIDES, MOCK_PADDY_TYPES } from "../../mocks";
+import { GUIDE_CANONICAL_TITLES, MOCK_GUIDES, MOCK_PADDY_TYPES } from "../../mocks";
 import { useAuth } from "../../auth/AuthContext";
 import type { GuideCard } from "../../mocks/types";
 
 interface PaddyInstructionsProps {
-  onGuideClick?: () => void;
+  onGuideClick?: (paddyType: string) => void;
+}
+
+function guideDisplayTitles(guide: GuideCard): { mm: string; en: string } {
+  const mapped = GUIDE_CANONICAL_TITLES[guide.paddyType];
+  if (mapped) return mapped;
+  return { mm: guide.title, en: guide.titleEn };
 }
 
 export function PaddyInstructions({ onGuideClick }: PaddyInstructionsProps) {
@@ -43,22 +49,24 @@ export function PaddyInstructions({ onGuideClick }: PaddyInstructionsProps) {
   });
 
   return (
-    <div className="min-h-screen bg-[#F8FAFC] pb-24">
+    <div className="min-h-screen overflow-x-hidden bg-[#F8FAFC] pb-24">
       {/* Header with Clean Design matching Dashboard */}
-      <header className="bg-[#1B4332] text-white px-6 pt-8 pb-6 shadow-lg">
-        <div className="flex items-center gap-3 mb-3">
+      <header className="bg-[#1B4332] px-4 pb-6 pt-[max(1.5rem,env(safe-area-inset-top))] text-white shadow-lg sm:px-6 sm:pt-8">
+        <div className="flex flex-col items-center text-center gap-3 max-w-2xl mx-auto">
           <div className="w-10 h-10 bg-white/20 backdrop-blur-sm rounded-xl flex items-center justify-center text-white">
             <BookOpen className="size-5" strokeWidth={2.2} aria-hidden />
           </div>
           <div>
-            <h1 className="text-3xl font-bold tracking-wide">ပညာရှင်များ၏ စိုက်ပျိုးရေးအကြံပြုချက်</h1>
+            <h1 className="text-xl font-bold leading-tight tracking-wide sm:text-2xl md:text-3xl">
+              ပညာရှင်များ၏ စိုက်ပျိုးရေးအကြံပြုချက်
+            </h1>
             <p className="text-base opacity-90 mt-1">Community Wisdom Cards</p>
           </div>
         </div>
       </header>
 
       {/* Variety Picker Section */}
-      <div className="px-6 py-6 bg-white border-b-4 border-gray-200">
+      <div className="border-b-4 border-gray-200 bg-white px-4 py-5 sm:px-6 sm:py-6">
         <label className="block text-xl font-bold text-[#1B4332] mb-4">
           စပါးအမျိုးအစား ရွေးချယ်ပါ
           <span className="block text-base text-gray-600 font-normal mt-1">Select Paddy Type</span>
@@ -78,50 +86,50 @@ export function PaddyInstructions({ onGuideClick }: PaddyInstructionsProps) {
       </div>
 
       {/* Instruction Cards */}
-      <div className="p-6 space-y-6">
-        {filteredGuides.map((guide) => (
-          <Card
-            key={guide.id}
-            onClick={onGuideClick}
-            className="border-2 border-gray-200 hover:border-[#16a34a] cursor-pointer active:scale-[0.99] transition-colors shadow-sm"
-          >
-            <CardContent className="p-5">
-              <div className="flex items-start justify-between gap-3 mb-5">
-                <div className="flex-1 min-w-0">
-                  <h3 className="text-xl font-bold text-[#2D5A27] mb-0.5">
-                    {guide.title}
-                  </h3>
-                  <p className="text-base text-gray-600">{guide.titleEn}</p>
+      <div className="space-y-6 p-4 sm:p-6">
+        {filteredGuides.map((guide) => {
+          const { mm: titleMM, en: titleEn } = guideDisplayTitles(guide);
+          return (
+            <Card
+              key={guide.id}
+              onClick={() => onGuideClick?.(guide.paddyType)}
+              className="border-2 border-gray-200 hover:border-[#16a34a] cursor-pointer active:scale-[0.99] transition-colors shadow-sm"
+            >
+              <CardContent className="p-5">
+                <div className="flex items-start justify-between gap-3 mb-5">
+                  <div className="flex-1 min-w-0">
+                    <h3 className="text-xl font-bold text-[#2D5A27] mb-0.5">{titleMM}</h3>
+                    <p className="text-base text-gray-600">{titleEn}</p>
+                  </div>
+                  <div className="shrink-0 flex flex-col items-end gap-2 text-right">
+                    {guide.verified ? (
+                      <Badge className="bg-[#16a34a] text-white text-sm px-2.5 py-1 gap-1">
+                        <Check className="size-3.5 shrink-0" strokeWidth={2.5} aria-hidden />
+                        Verified
+                      </Badge>
+                    ) : null}
+                    <div>
+                      <p className="text-xs font-medium text-gray-600 leading-tight">
+                        ကြိုက်နှစ်သက်သည့်အရေအတွက်
+                      </p>
+                      <p className="text-xl font-bold tabular-nums text-[#1B4332] mt-0.5">
+                        {guide.upvotes}
+                      </p>
+                    </div>
+                  </div>
                 </div>
-                {guide.verified && (
-                  <Badge className="shrink-0 bg-[#16a34a] text-white text-sm px-2.5 py-1 gap-1">
-                    <Check className="size-3.5 shrink-0" strokeWidth={2.5} aria-hidden />
-                    Verified
-                  </Badge>
-                )}
-              </div>
 
-              <div className="flex items-center gap-3">
                 <button
                   type="button"
                   onClick={(e) => e.stopPropagation()}
-                  className="flex-1 h-16 bg-[#1B4332] hover:bg-[#15291f] text-white rounded-xl flex items-center justify-center gap-2 text-lg font-bold active:scale-[0.98] transition-transform border-2 border-[#1B4332]"
+                  className="w-full h-16 bg-[#1B4332] hover:bg-[#15291f] text-white rounded-xl flex items-center justify-center text-lg font-bold active:scale-[0.98] transition-transform border-2 border-[#1B4332]"
                 >
-                  <ThumbsUp className="size-7 shrink-0" strokeWidth={2.2} aria-hidden />
-                  <span>{guide.upvotes}</span>
+                  ကြိုက်နှစ်သက်သည်
                 </button>
-                <button
-                  type="button"
-                  onClick={(e) => e.stopPropagation()}
-                  className="flex-1 h-16 bg-gray-100 hover:bg-gray-200 text-gray-800 rounded-xl flex items-center justify-center gap-2 text-lg font-bold active:scale-[0.98] transition-transform border-2 border-gray-200"
-                >
-                  <ThumbsDown className="size-7 shrink-0" strokeWidth={2.2} aria-hidden />
-                  <span>{guide.downvotes}</span>
-                </button>
-              </div>
-            </CardContent>
-          </Card>
-        ))}
+              </CardContent>
+            </Card>
+          );
+        })}
       </div>
 
       {filteredGuides.length === 0 && (

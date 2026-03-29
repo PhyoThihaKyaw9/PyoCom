@@ -13,8 +13,6 @@ export interface LocationSummary {
 export interface WeatherAlertBanner {
   titleMM: string;
   titleEn: string;
-  warningMM: string;
-  warningEn: string;
 }
 
 export interface GrowingSeasonSummary {

@@ -79,9 +79,47 @@ export const MOCK_GUIDES: GuideCard[] = [
   },
 ];
 
+/** MM/EN titles per variety — Paddy list cards + DetailedGuide header. */
+export const GUIDE_CANONICAL_TITLES: Record<string, { mm: string; en: string }> = {
+  "shwebo-pawsan": {
+    mm: "ရွှေဘိုပေါ်ဆန်းစိုက်ပျိုးနည်း",
+    en: "Shwebo Pawsan cultivation method",
+  },
+  "manaw-thukha": {
+    mm: "မနောသုခစိုက်ပျိုးနည်း",
+    en: "Manaw Thukha cultivation method",
+  },
+  "90-day": {
+    mm: "(၉၀)ရက်ကိုးဆယ်ဆန်စိုက်ပျိုးနည်း",
+    en: "90-day (Yetkoese) cultivation method",
+  },
+  sinthukha: {
+    mm: "စင်သုခဆန်စိုက်ပျိုးနည်း",
+    en: "Sinthukha cultivation method",
+  },
+  all: {
+    mm: "ရာသီဥတုခံနိုင်ရည် မြင့်သောမျိုးများစိုက်ပျိုးနည်း",
+    en: "Climate-resilient varieties cultivation method",
+  },
+};
+
+export function getDetailedGuideForPaddyType(
+  paddyType: string
+): DetailedGuideContent {
+  const titles = GUIDE_CANONICAL_TITLES[paddyType];
+  const card = MOCK_GUIDES.find((g) => g.paddyType === paddyType);
+  return {
+    ...MOCK_DETAILED_GUIDE,
+    title: titles?.mm ?? card?.title ?? MOCK_DETAILED_GUIDE.title,
+    titleEn: titles?.en ?? card?.titleEn ?? MOCK_DETAILED_GUIDE.titleEn,
+    upvotes: card?.upvotes ?? MOCK_DETAILED_GUIDE.upvotes,
+    rating: card?.rating ?? MOCK_DETAILED_GUIDE.rating,
+  };
+}
+
 export const MOCK_DETAILED_GUIDE: DetailedGuideContent = {
-  title: "ရွှေဘိုပေါစန်",
-  titleEn: "Shwebo Pawsan - Complete Growing Guide",
+  title: "ရွှေဘိုပေါ်ဆန်းစိုက်ပျိုးနည်း",
+  titleEn: "Shwebo Pawsan cultivation method",
   upvotes: 120,
   rating: 4.8,
   comments: [

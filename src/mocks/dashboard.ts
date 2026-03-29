@@ -21,9 +21,10 @@ export const MOCK_FORECAST_DAYS: ForecastDay[] = [
 export const MOCK_WEATHER_ALERT: WeatherAlertBanner = {
   titleMM: "မနက်ဖြန် မိုးကြီးမည်",
   titleEn: "Heavy Rain Tomorrow",
-  warningMM: "မြေသြဇာမကျွေးပါနှင့်",
-  warningEn: "Do Not Fertilize",
 };
+
+/** Demo: pest classifier runs aggregated for admin home (local mock). */
+export const MOCK_ADMIN_PEST_SCANS_MONTH = 156;
 
 export const MOCK_GROWING_SEASON: GrowingSeasonSummary = {
   dayLabelMM: "စိုက်ပျိုးရက် ၄၅",

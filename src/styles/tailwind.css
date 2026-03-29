@@ -3,6 +3,25 @@
 
 @import 'tw-animate-css';
 
+@layer base {
+  html {
+    -webkit-text-size-adjust: 100%;
+    text-size-adjust: 100%;
+  }
+  html,
+  body {
+    overflow-x: hidden;
+  }
+  body {
+    min-height: 100dvh;
+    min-height: 100svh;
+  }
+  #root {
+    min-height: 100dvh;
+    min-height: 100svh;
+  }
+}
+
 /* Custom utility for hiding scrollbars */
 .scrollbar-hide {
   -ms-overflow-style: none;

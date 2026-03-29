@@ -1,14 +1,18 @@
 import { useCallback, useEffect, useState } from "react";
+import type { LucideIcon } from "lucide-react";
 import {
   BookOpen,
   Bug,
   CloudRain,
+  LayoutDashboard,
+  Library,
   Lightbulb,
   LogOut,
   MapPin,
   Settings,
   Shield,
   Sprout,
+  Users,
 } from "lucide-react";
 import {
   broadcastPlantingPlanUpdated,
@@ -17,13 +21,22 @@ import {
   loadPlantingPlan,
   type PlantingPlan,
 } from "../../farmer/plantingPlanStorage";
-import { TimelineStageIcon, WeatherForecastIcon } from "../illustrationIcons";
-import { useAuth } from "../../auth/AuthContext";
 import {
+  loadContentAdminState,
+  mergeGuidesForFarmer,
+} from "../../admin/contentAdminState";
+import { mockCountUsers } from "../../auth/mockAuthStorage";
+import {
+  MOCK_ADMIN_PEST_SCANS_MONTH,
   MOCK_FORECAST_DAYS,
+  MOCK_GUIDES,
+  MOCK_KNOWLEDGE_ARTICLES,
   MOCK_LOCATION,
+  MOCK_PADDY_TYPES,
   MOCK_WEATHER_ALERT,
 } from "../../mocks";
+import { TimelineStageIcon, WeatherForecastIcon } from "../illustrationIcons";
+import { useAuth } from "../../auth/AuthContext";
 import { Card, CardContent } from "./ui/card";
 import {
   DropdownMenu,
@@ -40,6 +53,40 @@ function toMyanmarDigits(n: number): string {
     .split("")
     .map((c) => MM_DIGITS[Number(c)] ?? c)
     .join("");
+}
+
+function AdminStatCard({
+  icon: Icon,
+  labelMM,
+  labelEn,
+  value,
+  sublabel,
+}: {
+  icon: LucideIcon;
+  labelMM: string;
+  labelEn: string;
+  value: string | number;
+  sublabel?: string;
+}) {
+  return (
+    <Card className="border-2 border-white/25 bg-white/10 shadow-none backdrop-blur-sm">
+      <CardContent className="p-4 flex flex-col gap-2">
+        <div className="flex items-start justify-between gap-2">
+          <div className="min-w-0">
+            <p className="text-sm font-bold text-white leading-tight">{labelMM}</p>
+            <p className="text-[11px] text-white/75 mt-0.5">{labelEn}</p>
+          </div>
+          <div className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-white/15 text-white">
+            <Icon className="size-4" strokeWidth={2.25} aria-hidden />
+          </div>
+        </div>
+        <p className="text-2xl sm:text-3xl font-bold tabular-nums text-white">{value}</p>
+        {sublabel ? (
+          <p className="text-[11px] leading-snug text-white/80">{sublabel}</p>
+        ) : null}
+      </CardContent>
+    </Card>
+  );
 }
 
 interface DashboardProps {
@@ -79,17 +126,82 @@ export function Dashboard({
   const growingCtx =
     variant === "farmer" && plantingPlan ? getPlantingDayContext(plantingPlan) : null;
 
+  const computeAdminSnapshot = useCallback(() => {
+    const guides = mergeGuidesForFarmer(MOCK_GUIDES);
+    const content = loadContentAdminState();
+    return {
+      users: mockCountUsers(),
+      instructionCount: guides.length,
+      verifiedCount: guides.filter((g) => g.verified).length,
+      knowledgePosts: MOCK_KNOWLEDGE_ARTICLES.length,
+      customGuides: content.customGuides.length,
+      hiddenGuides: content.hiddenGuideIds.length,
+      contentActions: content.customGuides.length + content.hiddenGuideIds.length,
+    };
+  }, []);
+
+  const [adminSnapshot, setAdminSnapshot] = useState(() => computeAdminSnapshot());
+
+  const refreshAdminSnapshot = useCallback(() => {
+    setAdminSnapshot(computeAdminSnapshot());
+  }, [computeAdminSnapshot]);
+
+  useEffect(() => {
+    if (variant !== "admin") return;
+    refreshAdminSnapshot();
+    const onContent = () => refreshAdminSnapshot();
+    window.addEventListener("pyoe-content-admin-updated", onContent);
+    const onStorage = (e: StorageEvent) => {
+      if (
+        e.key === "pyoe-com-mock-users-v4" ||
+        e.key === "pyoe-com-admin-content-v1"
+      ) {
+        refreshAdminSnapshot();
+      }
+    };
+    window.addEventListener("storage", onStorage);
+    const onFocus = () => refreshAdminSnapshot();
+    window.addEventListener("focus", onFocus);
+    return () => {
+      window.removeEventListener("pyoe-content-admin-updated", onContent);
+      window.removeEventListener("storage", onStorage);
+      window.removeEventListener("focus", onFocus);
+    };
+  }, [variant, refreshAdminSnapshot]);
+
+  const varietyTrackCount = MOCK_PADDY_TYPES.filter((t) => t.value !== "all").length;
+
   return (
-    <div className="min-h-screen bg-[#F8FAFC]">
+    <div className="min-h-screen overflow-x-hidden bg-[#F8FAFC]">
       {/* Top Header with Clean Design */}
-      <header className="bg-[#1B4332] text-white px-6 pt-8 pb-6">
-        <div className="flex items-start justify-between gap-3 mb-6">
+      <header className="bg-[#1B4332] px-4 pb-6 pt-[max(1.5rem,env(safe-area-inset-top))] text-white sm:px-6 sm:pt-8">
+        <div className="mb-6 flex items-start justify-between gap-2 sm:gap-3">
           <div className="flex items-center gap-3 min-w-0 flex-1">
-            <MapPin className="w-7 h-7 shrink-0" strokeWidth={2.5} />
-            <div className="min-w-0">
-              <h1 className="text-4xl font-bold tracking-wide">{MOCK_LOCATION.nameMM}</h1>
-              <p className="text-lg opacity-90 mt-1">{MOCK_LOCATION.subtitleEn}</p>
-            </div>
+            {variant === "admin" ? (
+              <>
+                <div className="flex size-12 shrink-0 items-center justify-center rounded-2xl bg-white/15 text-white">
+                  <LayoutDashboard className="size-7" strokeWidth={2.25} aria-hidden />
+                </div>
+                <div className="min-w-0">
+                  <h1 className="text-3xl sm:text-4xl font-bold tracking-wide leading-tight">
+                    အက်မင် စာရင်း
+                  </h1>
+                  <p className="text-base sm:text-lg opacity-90 mt-1">
+                    Dashboard overview · ပျိုးကွန် ပလက်ဖောင်း
+                  </p>
+                </div>
+              </>
+            ) : (
+              <>
+                <MapPin className="size-6 shrink-0 sm:size-7" strokeWidth={2.5} />
+                <div className="min-w-0">
+                  <h1 className="text-2xl font-bold tracking-wide sm:text-3xl md:text-4xl">
+                    {MOCK_LOCATION.nameMM}
+                  </h1>
+                  <p className="mt-1 text-sm opacity-90 sm:text-lg">{MOCK_LOCATION.subtitleEn}</p>
+                </div>
+              </>
+            )}
           </div>
           {user ? (
             <div className="flex items-center gap-3 shrink-0 min-w-0 pl-1">
@@ -161,61 +273,130 @@ export function Dashboard({
           ) : null}
         </div>
 
-        {/* 5-Day Forecast - Horizontal Row */}
-        <div className="flex gap-3 justify-between">
-          {MOCK_FORECAST_DAYS.map((day, index) => (
-            <div 
-              key={index} 
-              className="bg-white/10 backdrop-blur-sm rounded-2xl p-4 flex-1 text-center border-2 border-white/20"
-            >
-              <p className="text-lg font-bold mb-2">{day.day}</p>
-              <p className="text-sm opacity-80 mb-3">{day.dayEn}</p>
-              <div className="flex justify-center mb-2 text-white">
-                <WeatherForecastIcon name={day.icon} className="size-9" />
+        {variant === "admin" ? (
+          <div className="grid grid-cols-2 gap-3 md:grid-cols-3">
+            <AdminStatCard
+              icon={Users}
+              labelMM="မှတ်ပုံတင်အသုံးပြုသူများ"
+              labelEn="Registered users"
+              value={adminSnapshot.users.total}
+              sublabel={`လယ်သမား ${adminSnapshot.users.farmers} · အက်မင် ${adminSnapshot.users.admins}`}
+            />
+            <AdminStatCard
+              icon={BookOpen}
+              labelMM="လမ်းညွှန်တင်သွင်းမှုများ"
+              labelEn="Instruction posts (visible)"
+              value={adminSnapshot.instructionCount}
+              sublabel={`အတည်ပြုထား ${adminSnapshot.verifiedCount}`}
+            />
+            <AdminStatCard
+              icon={Library}
+              labelMM="ဉာဏ်မျှဝေပို့စ်များ"
+              labelEn="Knowledge sharing posts"
+              value={adminSnapshot.knowledgePosts}
+              sublabel="တင်ပြီး ဉာဏ်မျှဝေ စာများ · Demo catalog"
+            />
+            <AdminStatCard
+              icon={Bug}
+              labelMM="ပိုးမွှားစကင်သုံးမှု"
+              labelEn="Pest scans (this month)"
+              value={MOCK_ADMIN_PEST_SCANS_MONTH}
+              sublabel="ဒေမို စုစည်းချက် · Local aggregate"
+            />
+            <AdminStatCard
+              icon={Sprout}
+              labelMM="စပါးအမျိုးအစားလမ်းကြောင်း"
+              labelEn="Variety tracks"
+              value={varietyTrackCount}
+              sublabel="လမ်းညွှန်အမျိုးအစား ရွေးစရာများ"
+            />
+            <AdminStatCard
+              icon={Shield}
+              labelMM="အကြောင်းကြား စီမံမှု"
+              labelEn="Content admin (demo)"
+              value={adminSnapshot.contentActions}
+              sublabel={`စိတ်ကြိုက်လမ်းညွှန် ${adminSnapshot.customGuides} · ဖျောက်ထား ${adminSnapshot.hiddenGuides}`}
+            />
+          </div>
+        ) : (
+          <div className="grid grid-cols-5 gap-1.5 sm:flex sm:justify-between sm:gap-3">
+            {MOCK_FORECAST_DAYS.map((day, index) => (
+              <div
+                key={index}
+                className="min-w-0 flex-1 rounded-xl border-2 border-white/20 bg-white/10 p-2 text-center backdrop-blur-sm sm:rounded-2xl sm:p-4"
+              >
+                <p className="mb-1 truncate text-[10px] font-bold leading-tight sm:mb-2 sm:text-lg">
+                  {day.day}
+                </p>
+                <p className="mb-1.5 text-[9px] opacity-80 sm:mb-3 sm:text-sm">{day.dayEn}</p>
+                <div className="mb-1 flex justify-center text-white sm:mb-2">
+                  <WeatherForecastIcon
+                    name={day.icon}
+                    className="size-6 sm:size-9"
+                  />
+                </div>
+                <p className="text-sm font-bold sm:text-xl">{day.temp}</p>
               </div>
-              <p className="text-xl font-bold">{day.temp}</p>
-            </div>
-          ))}
-        </div>
+            ))}
+          </div>
+        )}
       </header>
 
-      {/* Predictive Alert Banner - Burnt Harvest Orange #D97706 */}
-      <div className="bg-[#D97706] px-6 py-8 shadow-lg">
-        <div className="flex items-start gap-5">
-          <div className="w-20 h-20 bg-white rounded-2xl flex items-center justify-center flex-shrink-0 shadow-md text-[#D97706]">
-            <CloudRain className="size-10" strokeWidth={2} aria-hidden />
-          </div>
-          <div className="flex-1">
-            <h2 className="text-2xl font-bold text-white mb-2">
-              {MOCK_WEATHER_ALERT.titleMM}
-            </h2>
-            <p className="text-lg text-white/90 mb-4">{MOCK_WEATHER_ALERT.titleEn}</p>
-            <div className="bg-white/20 backdrop-blur-sm rounded-xl p-4 border-2 border-white/30 flex gap-3 items-start">
-              <CloudRain className="size-7 shrink-0 text-white mt-0.5" strokeWidth={2} aria-hidden />
-              <p className="text-xl font-bold text-white">
-                {MOCK_WEATHER_ALERT.warningMM}
+      {variant === "admin" ? (
+        <div className="border-t border-white/10 bg-[#D97706] px-4 py-6 shadow-lg sm:px-6 sm:py-7">
+          <div className="max-w-4xl mx-auto flex flex-col sm:flex-row sm:items-start sm:justify-between gap-5">
+            <div className="min-w-0 flex-1">
+              <h2 className="text-xl sm:text-2xl font-bold text-white leading-snug">
+                လုပ်ငန်းလည်ပတ်မှု နှင့် အကြောင်းကြား ပြင်ဆင်ချက်များ
+              </h2>
+              <p className="text-sm text-white/90 mt-2 leading-relaxed">
+                ရာသီဥတု ခန့်မှန်းချက်နှင့် မိုးလေဝသမှတ်တမ်းများ အက်မင်ဒိုင်ခွက်တွင် မပြပါ။ စာရင်းအင်းများ
+                မှတ်ပုံတင်ခြင်း၊ လမ်းညွှန်များ၊ ဉာဏ်မျှဝေမှုတို့ကို အောက်ပါ အက်မင် ပန်နယ်တွင်
+                စီမံခန့်ခွဲနိုင်ပါသည်။
               </p>
-              <p className="text-base text-white/90 mt-1">{MOCK_WEATHER_ALERT.warningEn}</p>
+            </div>
+            <div className="shrink-0 rounded-2xl bg-white/15 border-2 border-white/25 px-4 py-3 text-white max-w-md">
+              <p className="text-xs font-semibold uppercase tracking-wide text-white/80">
+                Platform · ဒေမို
+              </p>
+              <p className="text-sm text-white/95 mt-1 leading-snug">
+                Mock auth မှ အသုံးပြုသူရေတွက်ချက် ဖြစ်သည်။ လမ်းညွှန်အရေအတွက် သည် ကမ္ဘာ့လမ်းညွှန်များနှင့်
+                အက်မင်ဖျောက်ထားမှုများကို လိုက်ပါသည်။
+              </p>
             </div>
           </div>
         </div>
-      </div>
+      ) : (
+        <div className="bg-[#D97706] px-4 py-6 shadow-lg sm:px-6 sm:py-8">
+          <div className="flex items-start gap-3 sm:gap-5">
+            <div className="flex size-14 shrink-0 items-center justify-center rounded-xl bg-white text-[#D97706] shadow-md sm:size-20 sm:rounded-2xl">
+              <CloudRain className="size-8 sm:size-10" strokeWidth={2} aria-hidden />
+            </div>
+            <div className="min-w-0 flex-1">
+              <h2 className="mb-2 text-lg font-bold leading-snug text-white sm:text-2xl">
+                {MOCK_WEATHER_ALERT.titleMM}
+              </h2>
+              <p className="text-sm text-white/90 sm:text-lg">{MOCK_WEATHER_ALERT.titleEn}</p>
+            </div>
+          </div>
+        </div>
+      )}
 
-      <div className="px-6 py-8">
+      <div className="px-4 py-6 sm:px-6 sm:py-8">
         {variant === 'farmer' ? (
-          <div className="grid grid-cols-2 gap-5">
+          <div className="grid grid-cols-2 gap-3 sm:gap-5">
             <Card
               onClick={onNavigateToPest}
               className="border-4 border-[#1B4332] hover:shadow-xl cursor-pointer active:scale-98 transition-all bg-[#F8FAFC]"
             >
-              <CardContent className="p-6 flex flex-col items-center justify-center min-h-[220px]">
-                <div className="w-20 h-20 bg-[#1B4332] rounded-2xl flex items-center justify-center mb-4 text-white">
-                  <Bug className="size-10" strokeWidth={2} aria-hidden />
+              <CardContent className="flex min-h-[170px] flex-col items-center justify-center p-4 sm:min-h-[220px] sm:p-6">
+                <div className="mb-3 flex size-16 items-center justify-center rounded-2xl bg-[#1B4332] text-white sm:mb-4 sm:size-20">
+                  <Bug className="size-8 sm:size-10" strokeWidth={2} aria-hidden />
                 </div>
-                <h3 className="text-2xl font-bold text-[#1B4332] text-center mb-1">
+                <h3 className="mb-1 text-center text-base font-bold text-[#1B4332] sm:text-2xl">
                   ပိုးမွှားစကင်
                 </h3>
-                <p className="text-base text-gray-600 text-center">Pest Scan</p>
+                <p className="text-center text-xs text-gray-600 sm:text-base">Pest Scan</p>
               </CardContent>
             </Card>
 
@@ -223,14 +404,16 @@ export function Dashboard({
               onClick={onNavigateToGuides}
               className="border-4 border-[#1B4332] hover:shadow-xl cursor-pointer active:scale-98 transition-all bg-[#F8FAFC]"
             >
-              <CardContent className="p-6 flex flex-col items-center justify-center min-h-[220px]">
-                <div className="w-20 h-20 bg-[#1B4332] rounded-2xl flex items-center justify-center mb-4 text-white">
-                  <BookOpen className="size-10" strokeWidth={2} aria-hidden />
+              <CardContent className="flex min-h-[170px] flex-col items-center justify-center p-4 sm:min-h-[220px] sm:p-6">
+                <div className="mb-3 flex size-16 items-center justify-center rounded-2xl bg-[#1B4332] text-white sm:mb-4 sm:size-20">
+                  <BookOpen className="size-8 sm:size-10" strokeWidth={2} aria-hidden />
                 </div>
-                <h3 className="text-2xl font-bold text-[#1B4332] text-center mb-1">
+                <h3 className="mb-1 text-center text-base font-bold text-[#1B4332] sm:text-2xl">
                   လမ်းညွှန်များ
                 </h3>
-                <p className="text-base text-gray-600 text-center">Community Guides</p>
+                <p className="text-center text-xs text-gray-600 sm:text-base">
+                  Community Guides
+                </p>
               </CardContent>
             </Card>
           </div>

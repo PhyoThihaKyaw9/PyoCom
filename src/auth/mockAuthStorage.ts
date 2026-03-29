@@ -101,6 +101,22 @@ function writeUsers(users: StoredUser[]) {
   localStorage.setItem(USERS_KEY, JSON.stringify(users));
 }
 
+/** Snapshot of mock-auth accounts (farmers vs admins) for admin dashboard. */
+export function mockCountUsers(): {
+  total: number;
+  farmers: number;
+  admins: number;
+} {
+  const users = readUsers();
+  let farmers = 0;
+  let admins = 0;
+  for (const u of users) {
+    if (u.role === "admin") admins += 1;
+    else farmers += 1;
+  }
+  return { total: users.length, farmers, admins };
+}
+
 /** Strip non-digits for stable matching (e.g. 09-123-456789 vs 09123456789). */
 export function normalizePhone(phone: string): string {
   return phone.replace(/\D/g, "");

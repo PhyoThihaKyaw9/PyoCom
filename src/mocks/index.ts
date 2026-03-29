@@ -5,3 +5,4 @@ export * from "./pestScan";
 export * from "./community";
 export * from "./notifications";
 export * from "./appFlags";
+export * from "./paddyInstructionReviews";

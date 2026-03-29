@@ -1,5 +1,14 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { ArrowLeft, BookOpen, Shield, Trash2, Users } from "lucide-react";
+import {
+  ArrowLeft,
+  BookOpen,
+  MessageSquareText,
+  Search,
+  Shield,
+  ThumbsUp,
+  Trash2,
+  Users,
+} from "lucide-react";
 import { toast } from "sonner";
 import type { UserRole } from "../../auth/types";
 import {
@@ -21,7 +30,11 @@ import {
 } from "../../admin/knowledgeSharingState";
 import { KNOWLEDGE_CATEGORY_LABELS } from "../../mocks/community";
 import type { KnowledgeCategory } from "../../mocks/types";
-import { MOCK_GUIDES, MOCK_PADDY_TYPES } from "../../mocks";
+import {
+  MOCK_GUIDES,
+  MOCK_PADDY_INSTRUCTION_REVIEWS,
+  MOCK_PADDY_TYPES,
+} from "../../mocks";
 import type { GuideCard } from "../../mocks/types";
 import { Button } from "./ui/button";
 import { Card, CardContent } from "./ui/card";
@@ -36,6 +49,7 @@ import {
   SelectValue,
 } from "./ui/select";
 import { Switch } from "./ui/switch";
+import { Badge } from "./ui/badge";
 
 interface AdminDashboardProps {
   onBack: () => void;
@@ -74,6 +88,11 @@ export function AdminDashboard({ onBack }: AdminDashboardProps) {
   const [gVerified, setGVerified] = useState(true);
   const [gUpvotes, setGUpvotes] = useState("0");
   const [gDownvotes, setGDownvotes] = useState("0");
+
+  const [userSearch, setUserSearch] = useState("");
+  const [userRoleTab, setUserRoleTab] = useState<"all" | "farmer" | "admin">(
+    "all"
+  );
 
   const reloadAccounts = useCallback(() => {
     if (!user || user.role !== "admin") return;
@@ -157,8 +176,28 @@ export function AdminDashboard({ onBack }: AdminDashboardProps) {
       admins,
       guidesTotal: allCatalogGuides.length,
       guidesVisible: visibleGuides,
+      instructionReviews: MOCK_PADDY_INSTRUCTION_REVIEWS.length,
     };
   }, [accounts, content.hiddenGuideIds, allCatalogGuides]);
+
+  const filteredAccounts = useMemo(() => {
+    const q = userSearch.trim().toLowerCase();
+    const digits = q.replace(/\D/g, "");
+    return accounts.filter((a) => {
+      if (userRoleTab === "farmer" && a.role !== "farmer") return false;
+      if (userRoleTab === "admin" && a.role !== "admin") return false;
+      if (!q) return true;
+      const name = a.displayName.toLowerCase();
+      const phoneDigits = a.phone.replace(/\D/g, "");
+      return (
+        name.includes(q) ||
+        (digits.length > 0 && phoneDigits.includes(digits))
+      );
+    });
+  }, [accounts, userSearch, userRoleTab]);
+
+  const soleAdminLocked =
+    accounts.filter((x) => x.role === "admin").length <= 1;
 
   const setGuideHidden = (guideId: number, hidden: boolean) => {
     const hiddenSet = new Set(content.hiddenGuideIds);
@@ -268,12 +307,28 @@ export function AdminDashboard({ onBack }: AdminDashboardProps) {
   };
 
   if (!user || user.role !== "admin") {
-    return null;
+    return (
+      <div className="flex min-h-dvh flex-col items-center justify-center overflow-x-hidden bg-[#F8FAFC] px-4 pb-24 sm:px-6">
+        <div className="max-w-md w-full rounded-2xl border-4 border-[#1B4332]/25 bg-white p-6 shadow-lg text-center space-y-4">
+          <p className="text-lg font-bold text-[#1B4332]">အက်မင်အခွင့်မရှိပါ</p>
+          <p className="text-sm text-gray-600">
+            Admin access required · ဤစာမျက်နှာကို ဖြတ်သန်းခွင့်မရှိပါ။
+          </p>
+          <Button
+            type="button"
+            className="w-full bg-[#1B4332] hover:bg-[#15291f]"
+            onClick={onBack}
+          >
+            ပင်မသို့ ပြန်သွားရန် · Back to home
+          </Button>
+        </div>
+      </div>
+    );
   }
 
   return (
-    <div className="min-h-screen bg-[#F8FAFC] pb-24">
-      <header className="bg-[#1B4332] text-white px-6 pt-8 pb-6 shadow-lg">
+    <div className="min-h-dvh overflow-x-hidden bg-[#F8FAFC] pb-24">
+      <header className="bg-[#1B4332] px-4 pb-5 pt-[max(1.5rem,env(safe-area-inset-top))] text-white shadow-lg sm:px-6 sm:pb-6 sm:pt-8">
         <div className="flex items-center gap-3 mb-2">
           <Button
             type="button"
@@ -288,17 +343,19 @@ export function AdminDashboard({ onBack }: AdminDashboardProps) {
           <div className="flex items-center gap-2 min-w-0">
             <Shield className="size-8 shrink-0 opacity-90" />
             <div className="min-w-0">
-              <h1 className="text-2xl font-bold tracking-wide truncate">
-                Admin
+              <h1 className="truncate text-lg font-bold tracking-wide sm:text-2xl">
+                အက်မင် စီမံခန့်ခွဲမှု
               </h1>
-              <p className="text-sm opacity-90">Local demo dashboard</p>
+              <p className="text-xs opacity-90 sm:text-sm">
+                Users, guides, knowledge · ဒေမို စက်ပိုင်း
+              </p>
             </div>
           </div>
         </div>
       </header>
 
-      <div className="px-6 py-6 space-y-6 max-w-lg mx-auto w-full">
-        <div className="grid grid-cols-2 gap-3">
+      <div className="mx-auto w-full max-w-2xl space-y-6 px-4 py-5 sm:px-6 sm:py-6">
+        <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
           <Card className="border-2 border-[#1B4332]/20">
             <CardContent className="p-4">
               <p className="text-xs text-gray-500 uppercase tracking-wide">
@@ -321,7 +378,240 @@ export function AdminDashboard({ onBack }: AdminDashboardProps) {
               <p className="text-xs text-gray-500 mt-1">visible in app</p>
             </CardContent>
           </Card>
+          <Card className="border-2 border-[#D97706]/30 bg-[#fffbeb]/30 col-span-2 sm:col-span-1">
+            <CardContent className="p-4">
+              <p className="text-xs text-gray-500 uppercase tracking-wide">
+                Instruction reviews
+              </p>
+              <p className="text-3xl font-bold text-[#D97706]">
+                {stats.instructionReviews}
+              </p>
+              <p className="text-xs text-gray-500 mt-1">
+                လမ်းညွှန် သုံးသပ်ချက် · Mock
+              </p>
+            </CardContent>
+          </Card>
         </div>
+
+        <Card className="border-4 border-[#1B4332] shadow-md">
+          <CardContent className="p-5 space-y-4">
+            <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+              <div className="flex items-start gap-3 min-w-0">
+                <div className="flex size-12 shrink-0 items-center justify-center rounded-xl bg-[#1B4332] text-white">
+                  <Users className="size-6" strokeWidth={2} aria-hidden />
+                </div>
+                <div className="min-w-0">
+                  <h2 className="font-bold text-[#1B4332] text-xl leading-tight">
+                    အသုံးပြုသူ စီမံခန့်ခွဲမှု
+                  </h2>
+                  <p className="text-sm text-gray-600 mt-1">
+                    Main user management for this app mock: promote farmers to admin or demote to farmer.
+                    စကားဝှက်များ မပြပါ — passwords never displayed.
+                  </p>
+                </div>
+              </div>
+              {soleAdminLocked ? (
+                <div className="rounded-lg border border-amber-300 bg-amber-50 px-3 py-2 text-xs text-amber-950 shrink-0 max-w-sm leading-snug">
+                  <span className="font-semibold">သတိပေး ·</span> အက်မင် တစ်ဦးသာ ရှိပါသည်။ နောက်ထပ်
+                  အက်မင် မတင်မီ သင့်အကောင့်ကို လယ်သမားအဖြစ် မချုပ်ချယ်ပါနှင့်။
+                </div>
+              ) : null}
+            </div>
+
+            <div className="flex flex-wrap gap-2">
+              {(
+                [
+                  ["all", `အားလုံး (${stats.users})`] as const,
+                  ["farmer", `လယ်သမား (${stats.farmers})`] as const,
+                  ["admin", `အက်မင် (${stats.admins})`] as const,
+                ] as const
+              ).map(([key, label]) => (
+                <Button
+                  key={key}
+                  type="button"
+                  size="sm"
+                  variant={userRoleTab === key ? "default" : "outline"}
+                  className={
+                    userRoleTab === key
+                      ? "bg-[#1B4332] hover:bg-[#15291f]"
+                      : "border-2 border-[#1B4332]/30"
+                  }
+                  onClick={() => setUserRoleTab(key)}
+                >
+                  {label}
+                </Button>
+              ))}
+            </div>
+
+            <div className="relative">
+              <Search
+                className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-gray-400"
+                aria-hidden
+              />
+              <Input
+                placeholder="အမည် သို့ ဖုန်းနံပါတ် ရှာရန် · Search name or phone"
+                value={userSearch}
+                onChange={(e) => setUserSearch(e.target.value)}
+                className="h-11 border-2 border-[#1B4332]/30 pl-10"
+                aria-label="Search accounts"
+              />
+            </div>
+
+            <ul className="space-y-3">
+              {filteredAccounts.map((a) => {
+                const isSelf = a.id === user.id;
+                return (
+                  <li
+                    key={a.id}
+                    className={`rounded-xl border-2 bg-white p-4 ${
+                      isSelf
+                        ? "border-[#16a34a] shadow-[0_0_0_1px_rgba(22,163,74,0.15)]"
+                        : "border-gray-200"
+                    }`}
+                  >
+                    <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                      <div className="min-w-0 flex-1">
+                        <div className="flex flex-wrap items-center gap-2">
+                          <p className="font-semibold text-[#1B4332] truncate">
+                            {a.displayName}
+                          </p>
+                          {isSelf ? (
+                            <Badge className="bg-[#16a34a] px-1.5 py-0 text-[10px] text-white">
+                              ယခုဝင်နေသူ · You
+                            </Badge>
+                          ) : null}
+                          <Badge
+                            variant="secondary"
+                            className={
+                              a.role === "admin"
+                                ? "border border-[#1B4332]/25 bg-[#1B4332]/10 text-[#1B4332]"
+                                : "border border-[#16a34a]/25 bg-[#f0fdf4] text-[#166534]"
+                            }
+                          >
+                            {a.role === "admin" ? "အက်မင်" : "လယ်သမား"}
+                          </Badge>
+                        </div>
+                        <p className="mt-1 break-all font-mono text-xs text-gray-500">
+                          {a.phone}
+                        </p>
+                      </div>
+                      <div className="w-full shrink-0 space-y-1 sm:w-[210px]">
+                        <Label className="text-[10px] uppercase tracking-wide text-gray-500">
+                          အခွင့်အရေး · Role
+                        </Label>
+                        <Select
+                          value={a.role}
+                          onValueChange={(v) =>
+                            void handleRoleChange(a.id, v as UserRole, a.displayName)
+                          }
+                          disabled={
+                            soleAdminLocked && isSelf && a.role === "admin"
+                          }
+                        >
+                          <SelectTrigger className="h-11 border-2 border-[#1B4332]/40">
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="farmer">
+                              လယ်သမား · Farmer
+                            </SelectItem>
+                            <SelectItem value="admin">အက်မင် · Admin</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                    </div>
+                  </li>
+                );
+              })}
+            </ul>
+            {accounts.length === 0 ? (
+              <p className="text-sm text-gray-500">
+                Mock store တွင် အကောင့် မရှိပါ — No accounts in mock store.
+              </p>
+            ) : filteredAccounts.length === 0 ? (
+              <p className="text-sm text-gray-500">
+                စစ်ထုတ်ချက်နှင့် ကိုက်ညီသော အကောင့် မရှိပါ · No accounts match filters.
+              </p>
+            ) : null}
+          </CardContent>
+        </Card>
+
+        <Card className="border-4 border-[#1B4332]/25">
+          <CardContent className="p-5 space-y-4">
+            <div className="flex items-start gap-3">
+              <div className="flex size-11 shrink-0 items-center justify-center rounded-xl bg-[#1B4332]/10 text-[#1B4332]">
+                <MessageSquareText className="size-6" strokeWidth={2} aria-hidden />
+              </div>
+              <div className="min-w-0 flex-1">
+                <h2 className="font-bold text-[#1B4332] text-lg leading-tight">
+                  လမ်းညွှန်မှ လယ်သမားသုံးသပ်ချက်များ
+                </h2>
+                <p className="text-sm text-gray-600 mt-1">
+                  Reviews from paddy instruction cards (ကြိုက်နှစ်သက်သည် / optional comments). ဒေမို
+                  အချက်အလက်သာ · frontend demo.
+                </p>
+              </div>
+            </div>
+            <ul className="space-y-4">
+              {MOCK_PADDY_INSTRUCTION_REVIEWS.map((r) => {
+                const typeLabel =
+                  MOCK_PADDY_TYPES.find((t) => t.value === r.paddyType)?.label ??
+                  r.paddyType;
+                return (
+                  <li
+                    key={r.id}
+                    className="rounded-xl border-2 border-gray-200 bg-white p-4 shadow-sm space-y-3"
+                  >
+                    <div className="flex flex-wrap items-start justify-between gap-2">
+                      <div className="min-w-0">
+                        <p className="font-semibold text-[#1B4332]">{r.farmerName}</p>
+                        <p className="text-xs text-gray-500">{r.phoneMasked}</p>
+                      </div>
+                      <div className="text-right shrink-0">
+                        <p className="text-xs font-medium text-gray-700">{r.submittedAtMM}</p>
+                        <p className="text-[10px] text-gray-500">{r.submittedAtEn}</p>
+                      </div>
+                    </div>
+                    <div className="rounded-lg bg-[#f8fafc] border border-[#1B4332]/10 px-3 py-2">
+                      <p className="text-sm font-medium text-gray-900">{r.guideTitleMM}</p>
+                      <p className="text-xs text-gray-600 mt-0.5">{r.guideTitleEn}</p>
+                    </div>
+                    <div className="flex flex-wrap items-center gap-2">
+                      <Badge
+                        variant="secondary"
+                        className="bg-[#f0fdf4] text-[#166534] border border-[#16a34a]/30 text-xs"
+                      >
+                        {typeLabel}
+                      </Badge>
+                      {r.liked ? (
+                        <span className="inline-flex items-center gap-1 rounded-full bg-[#1B4332]/10 px-2.5 py-0.5 text-xs font-medium text-[#1B4332]">
+                          <ThumbsUp className="size-3.5" strokeWidth={2} aria-hidden />
+                          ကြိုက်နှစ်သက်သည်
+                        </span>
+                      ) : null}
+                    </div>
+                    {r.commentMM || r.commentEn ? (
+                      <div className="rounded-lg border border-[#E67E22]/40 bg-[#FEF3C7]/40 px-3 py-2 text-sm">
+                        {r.commentMM ? (
+                          <p className="text-gray-900 leading-snug">{r.commentMM}</p>
+                        ) : null}
+                        {r.commentEn ? (
+                          <p className="text-gray-600 text-xs mt-1 leading-snug">
+                            {r.commentEn}
+                          </p>
+                        ) : null}
+                      </div>
+                    ) : (
+                      <p className="text-xs text-gray-500 italic">
+                        အကြောင်းအရာ မထည့်ပါ (သာ သဘောကျခြင်း)
+                      </p>
+                    )}
+                  </li>
+                );
+              })}
+            </ul>
+          </CardContent>
+        </Card>
 
         <Card className="border-4 border-[#1B4332]/25">
           <CardContent className="p-5 space-y-4">
@@ -489,7 +779,7 @@ export function AdminDashboard({ onBack }: AdminDashboardProps) {
                           လယ်သမားမြင် · Visible
                         </Label>
                       </div>
-                      <div className="flex items-center gap-2 min-w-[200px]">
+                      <div className="flex w-full min-w-0 items-center gap-2 sm:w-auto sm:min-w-[200px]">
                         <span className="text-xs text-gray-500 shrink-0">
                           Verified
                         </span>
@@ -654,51 +944,6 @@ export function AdminDashboard({ onBack }: AdminDashboardProps) {
                   ))}
                 </ul>
               </div>
-            ) : null}
-          </CardContent>
-        </Card>
-
-        <Card className="border-4 border-[#1B4332]/25">
-          <CardContent className="p-5 space-y-4">
-            <div className="flex items-center gap-2 text-[#1B4332] font-bold">
-              <Users className="size-5" />
-              <span>Mock accounts &amp; roles</span>
-              <span className="text-xs font-normal text-gray-500">
-                (no passwords shown)
-              </span>
-            </div>
-            <ul className="space-y-3">
-              {accounts.map((a) => (
-                <li
-                  key={a.id}
-                  className="flex flex-col gap-2 rounded-xl border-2 border-gray-200 bg-white p-3 sm:flex-row sm:items-center sm:justify-between"
-                >
-                  <div className="min-w-0">
-                    <p className="font-semibold text-[#1B4332] truncate">
-                      {a.displayName}
-                    </p>
-                    <p className="text-xs text-gray-500 break-all">{a.phone}</p>
-                  </div>
-                  <Select
-                    value={a.role}
-                    onValueChange={(v) =>
-                      void handleRoleChange(a.id, v as UserRole, a.displayName)
-                    }
-                    disabled={a.id === user.id && accounts.filter((x) => x.role === "admin").length <= 1}
-                  >
-                    <SelectTrigger className="w-full sm:w-[140px] h-11 border-2 border-[#1B4332]/40">
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="farmer">Farmer</SelectItem>
-                      <SelectItem value="admin">Admin</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </li>
-              ))}
-            </ul>
-            {accounts.length === 0 ? (
-              <p className="text-sm text-gray-500">No accounts in mock store.</p>
             ) : null}
           </CardContent>
         </Card>
