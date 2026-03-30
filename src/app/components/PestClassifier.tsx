@@ -18,7 +18,7 @@ export function PestClassifier() {
 	const [showCamera, setShowCamera] = useState(false);
 	const [result, setResult] = useState<PestScanResult | null>(null);
 	const [error, setError] = useState<string | null>(null);
-
+ const [ImagePicked, setImagePicked] = useState(true);
 	// API call to backend /scan
 	const scanPestImage = async (file: File) => {
 		setScanning(true);
@@ -95,7 +95,7 @@ export function PestClassifier() {
 				<div className="flex min-h-[60vh] flex-col items-center justify-center space-y-6 px-4 py-6 sm:min-h-[70vh] sm:space-y-8 sm:p-8">
 					{/* Large Simple Camera Icon */}
 					<div className="flex h-28 w-28 items-center justify-center rounded-3xl border-4 border-white/30 bg-[#16a34a] text-white shadow-inner sm:h-40 sm:w-40">
-						<ImagePicker onImageSelected={handleImageSelected} />
+						<ImagePicker onImageSelected={handleImageSelected}  />
 					</div>
 
 					<div className="space-y-2 text-center sm:space-y-3">

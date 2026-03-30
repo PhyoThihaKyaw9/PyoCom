@@ -26,8 +26,14 @@ const ImagePicker: React.FC<ImagePickerProps> = ({
 	};
 
 	return (
-		
-		<div>
+		<div
+			style={{
+				display: "flex",
+				alignItems: "center",
+				justifyContent: "center",
+				flexDirection: "column",
+			}}
+		>
 			<input
 				type="file"
 				accept="image/*"
@@ -37,6 +43,12 @@ const ImagePicker: React.FC<ImagePickerProps> = ({
 			/>
 			<button
 				type="button"
+				style={{
+					display: "flex",
+					justifyContent: "center",
+					flexDirection: "column",
+					alignItems: "center",
+				}}
 				className={buttonClassName}
 				onClick={() => fileInputRef.current?.click()}
 			>
@@ -48,7 +60,7 @@ const ImagePicker: React.FC<ImagePickerProps> = ({
 					<img
 						src={preview}
 						alt="Preview"
-						style={{ maxWidth: 200, marginTop: 10 }}
+						style={{ display: "block", maxWidth: 200, marginTop: 10 }}
 					/>
 				</div>
 			)}
