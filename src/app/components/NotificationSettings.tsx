@@ -60,7 +60,6 @@ export function NotificationSettings({
     user,
     signOut,
     updateDisplayName,
-    changePassword,
     clearAllLocalAccounts,
   } = useAuth();
 
@@ -85,10 +84,6 @@ export function NotificationSettings({
     if (user?.displayName) setNameEdit(user.displayName);
   }, [user?.displayName]);
 
-  const [pwdCurrent, setPwdCurrent] = useState("");
-  const [pwdNew, setPwdNew] = useState("");
-  const [pwdConfirm, setPwdConfirm] = useState("");
-
   const handleSaveName = async () => {
     try {
       await updateDisplayName(nameEdit);
@@ -99,39 +94,6 @@ export function NotificationSettings({
         toast.error("Invalid name", { description: "အမည် ထည့်ပါ" });
       } else {
         toast.error("Could not update", { description: "ပြင်ဆင်မရပါ" });
-      }
-    }
-  };
-
-  const handleChangePassword = async () => {
-    if (pwdNew.length < 6) {
-      toast.error("Password too short", {
-        description: "စကားဝေါ် အနည်းဆုံး ၆ လုံး",
-      });
-      return;
-    }
-    if (pwdNew !== pwdConfirm) {
-      toast.error("Mismatch", { description: "စကားဝေါ်အသစ် မတူညီပါ" });
-      return;
-    }
-    try {
-      await changePassword(pwdCurrent, pwdNew);
-      setPwdCurrent("");
-      setPwdNew("");
-      setPwdConfirm("");
-      toast.success("Password changed", {
-        description: "စကားဝေါ် ပြောင်းလဲပြီးပါပြီ",
-      });
-    } catch (e) {
-      const msg = (e as Error).message;
-      if (msg === "INVALID_CREDENTIALS") {
-        toast.error("Wrong password", {
-          description: "လက်ရှိ စကားဝေါ် မမှန်ပါ",
-        });
-      } else if (msg === "WEAK_PASSWORD") {
-        toast.error("Too short", { description: "စကားဝေါ် အနည်းဆုံး ၆ လုံး" });
-      } else {
-        toast.error("Could not change", { description: "မအောင်မြင်ပါ" });
       }
     }
   };
@@ -245,56 +207,6 @@ export function NotificationSettings({
                     </Button>
                   </div>
                 </div>
-              </CardContent>
-            </Card>
-
-            <Card className="border-4 border-[#1B4332]/25 bg-white">
-              <CardHeader className="pb-2">
-                <CardTitle className="text-base">စကားဝေါ် ပြောင်းရန်</CardTitle>
-                <p className="text-sm text-gray-500 font-normal">Change password</p>
-              </CardHeader>
-              <CardContent className="space-y-3">
-                <div>
-                  <Label htmlFor="pwd-old">လက်ရှိ စကားဝေါ်</Label>
-                  <Input
-                    id="pwd-old"
-                    type="password"
-                    autoComplete="current-password"
-                    value={pwdCurrent}
-                    onChange={(e) => setPwdCurrent(e.target.value)}
-                    className={`${fieldClass} mt-1`}
-                  />
-                </div>
-                <div>
-                  <Label htmlFor="pwd-new">စကားဝေါ် အသစ်</Label>
-                  <Input
-                    id="pwd-new"
-                    type="password"
-                    autoComplete="new-password"
-                    value={pwdNew}
-                    onChange={(e) => setPwdNew(e.target.value)}
-                    className={`${fieldClass} mt-1`}
-                  />
-                </div>
-                <div>
-                  <Label htmlFor="pwd-confirm">စကားဝေါ် အသစ် အတည်ပြု</Label>
-                  <Input
-                    id="pwd-confirm"
-                    type="password"
-                    autoComplete="new-password"
-                    value={pwdConfirm}
-                    onChange={(e) => setPwdConfirm(e.target.value)}
-                    className={`${fieldClass} mt-1`}
-                  />
-                </div>
-                <Button
-                  type="button"
-                  variant="outline"
-                  className="w-full border-2 border-[#1B4332] text-[#1B4332]"
-                  onClick={() => void handleChangePassword()}
-                >
-                  စကားဝေါ် အသစ်သို့ ပြောင်းမည်
-                </Button>
               </CardContent>
             </Card>
 
@@ -526,7 +438,7 @@ export function NotificationSettings({
                 <p className="font-semibold text-[#1B4332]">Pyoe Com</p>
                 <p className="text-sm text-gray-600">
                   စပါးစိုက်ပျိုးသူများအတွက် မိုးလေဝသ၊ လမ်းညွှန်ချက်များ၊ ပိုးစိစစ်ခြင်း နှင့်
-                  ဉာဏ်မျှဝေရေး (အက်မင်မှ တင်သော သတင်းများ)။
+                  သုတမျှဝေရေး (အက်မင်မှ တင်သော သတင်းများ)။
                 </p>
                 <p className="text-xs text-gray-500">
                   Version {appVersion} · Demo build
@@ -546,7 +458,7 @@ export function NotificationSettings({
                 <p>• ပင်မစာမျက်နှာရှိ မိုးလေဝသ နှင့် သတိပေးချက်များကို နေ့စဉ် စစ်ပါ။</p>
                 <p>• လမ်းညွှန်တွင် စပါးအမျိုးအစား ရွေးပြီး ကျွမ်းကျင်သူ အကြံပြုချက်များ ဖတ်ပါ။</p>
                 <p>• ပိုးစကင်ဖြင့် ပုံမှ အရေးပေါ် ကုသနည်းလမ်းများ ရယူပါ။</p>
-                <p>• ဉာဏ်မျှဝေရေးတွင် စိုက်ပျိုးရေးသတင်းနှင့် အက်မင် မှတ်ချက်များ ဖတ်ပါ။</p>
+                <p>• သုတမျှဝေရေးတွင် စိုက်ပျိုးရေးသတင်းနှင့် အက်မင် မှတ်ချက်များ ဖတ်ပါ။</p>
                 <p className="text-xs text-gray-500 pt-1">
                   Check weather, browse guides by variety, scan pests, and read Knowledge posts
                   shared by admins.
@@ -565,11 +477,9 @@ export function NotificationSettings({
               <CardContent className="text-sm text-amber-950/90 space-y-2">
                 <p>
                   ဤနှစ်ဆင့်ဖော်ပြချက်တွင် အကောင့်နှင့် ဆက်တင်များကို သင့်ဘရောင်ဇာတွင် သိမ်းသည်။
-                  စကားဝေါ်များ လုံးဝ လုံခြုံစွာ ကူးသွင်းမထားပါ။
                 </p>
                 <p className="text-xs opacity-90">
-                  Accounts and preferences stay in your browser only. Passwords are not hashed in
-                  this demo — do not use real passwords.
+                  Accounts and preferences stay in your browser only (demo).
                 </p>
               </CardContent>
             </Card>
@@ -601,12 +511,12 @@ export function NotificationSettings({
                       <AlertDialogTitle>အားလုံး ဖျက်မလား?</AlertDialogTitle>
                       <AlertDialogDescription className="text-left space-y-2">
                         <span className="block">
-                          အကောင့်များ၊ စကားဝေါ်များ၊ ဆက်တင်၊ ဉာဏ်မျှဝေရေး ပိုစ်များ၊ လမ်းညွှန် အက်မင်
-                          ပြင်ဆင်ချက်များပါ ပျက်သွားပါမည်။
+                          အကောင့်များ၊ ဆက်တင်၊ သုတမျှဝေရေး ပိုစ်များ၊ လမ်းညွှန် အက်မင် ပြင်ဆင်ချက်များပါ
+                          ပျက်သွားပါမည်။
                         </span>
                         <span className="block text-xs">
-                          Accounts, passwords, preferences, custom Knowledge posts, and admin guide
-                          overrides on this browser will be removed.
+                          Accounts, preferences, custom Knowledge posts, and admin guide overrides
+                          on this browser will be removed.
                         </span>
                       </AlertDialogDescription>
                     </AlertDialogHeader>

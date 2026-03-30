@@ -406,7 +406,7 @@ export function AdminDashboard({ onBack }: AdminDashboardProps) {
                   </h2>
                   <p className="text-sm text-gray-600 mt-1">
                     Main user management for this app mock: promote farmers to admin or demote to farmer.
-                    စကားဝှက်များ မပြပါ — passwords never displayed.
+                    Phone and display name only in this demo.
                   </p>
                 </div>
               </div>
@@ -821,7 +821,7 @@ export function AdminDashboard({ onBack }: AdminDashboardProps) {
               <span>Knowledge sharing</span>
             </div>
             <p className="text-sm text-gray-600">
-              Posts appear in the farmer ဉာဏ်မျှဝေရေး tab on this device.
+              Posts appear in the farmer သုတမျှဝေရေး tab on this device.
             </p>
             <div className="space-y-3 rounded-xl border-2 border-gray-200 bg-white p-4">
               <div className="space-y-2">

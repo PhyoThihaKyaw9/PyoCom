@@ -432,7 +432,7 @@ export function Dashboard({
                     အက်မင် ပန်နယ်
                   </h3>
                   <p className="text-base text-gray-600">
-                    Admin workspace · လမ်းညွှန်စီမံချက်၊ ဉာဏ်မျှဝေရေး တင်ခြင်း၊ အသုံးပြုသူအခွင့်အရေးများ
+                    Admin workspace · လမ်းညွှန်စီမံချက်၊ သုတမျှဝေရေး တင်ခြင်း၊ အသုံးပြုသူအခွင့်အရေးများ
                   </p>
                   <p className="text-sm text-gray-500">
                     Manage guide visibility, publish knowledge posts, and change mock user roles (local demo).

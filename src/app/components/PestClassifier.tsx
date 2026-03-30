@@ -1,12 +1,11 @@
 import { useState } from "react";
 import {
-	AlertTriangle,
-	BookOpen,
-	Bug,
-	Camera,
-	Check,
-	Pill,
-	X,
+  AlertTriangle,
+  Camera,
+  Check,
+  Pill,
+  Sprout,
+  X,
 } from "lucide-react";
 import { MOCK_PEST_SCAN_RESULT, type PestScanResult } from "../../mocks";
 import { Button } from "./ui/button";
@@ -91,12 +90,23 @@ export function PestClassifier() {
 					</div>
 				</header>
 
-				{/* Main Content */}
-				<div className="flex min-h-[60vh] flex-col items-center justify-center space-y-6 px-4 py-6 sm:min-h-[70vh] sm:space-y-8 sm:p-8">
-					{/* Large Simple Camera Icon */}
-					<div className="flex h-28 w-28 items-center justify-center rounded-3xl border-4 border-white/30 bg-[#16a34a] text-white shadow-inner sm:h-40 sm:w-40">
-						<ImagePicker onImageSelected={handleImageSelected}  />
-					</div>
+  if (!showCamera) {
+    return (
+      <div className="min-h-dvh overflow-x-hidden bg-[#F8FAFC]">
+        {/* Header matching Dashboard design */}
+        <header className="bg-[#1B4332] px-4 pb-5 pt-[max(1.5rem,env(safe-area-inset-top))] text-white shadow-lg sm:px-6 sm:pb-6 sm:pt-8">
+          <div className="mb-3 flex items-center gap-3">
+            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-white/20 text-white backdrop-blur-sm">
+              <Camera className="size-5" strokeWidth={2.2} aria-hidden />
+            </div>
+            <div className="min-w-0">
+              <h1 className="text-xl font-bold tracking-wide sm:text-3xl">
+                AI အပင်ရောဂါပိုးခွဲခြားစနစ်
+              </h1>
+              <p className="mt-1 text-sm opacity-90 sm:text-base">AI Pest Classifier</p>
+            </div>
+          </div>
+        </header>
 
 					<div className="space-y-2 text-center sm:space-y-3">
 						<h2 className="text-xl font-bold text-gray-900 sm:text-3xl">
@@ -105,80 +115,61 @@ export function PestClassifier() {
 						<p className="text-base text-gray-600 sm:text-xl">Scan a Pest</p>
 					</div>
 
-					{/* Instructions */}
-					<Card className="w-full max-w-lg border-4 border-gray-300">
-						<CardContent className="space-y-4 p-4 sm:space-y-6 sm:p-6">
-							<div className="flex items-start gap-3 sm:gap-4">
-								<div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[#16a34a] text-lg font-bold text-white sm:h-12 sm:w-12 sm:text-2xl">
-									1
-								</div>
-								<div className="min-w-0">
-									<p className="mb-1 text-base font-bold text-gray-900 sm:text-xl">
-										ပိုးမွှားကို အနီးကပ်ရိုက်ပါ
-									</p>
-									<p className="text-sm text-gray-600 sm:text-lg">
-										Take a close-up photo of the pest
-									</p>
-								</div>
-							</div>
-							<div className="flex items-start gap-3 sm:gap-4">
-								<div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[#16a34a] text-lg font-bold text-white sm:h-12 sm:w-12 sm:text-2xl">
-									2
-								</div>
-								<div className="min-w-0">
-									<p className="mb-1 text-base font-bold text-gray-900 sm:text-xl">
-										အလင်းရောင် လုံလောက်ပါစေ
-									</p>
-									<p className="text-sm text-gray-600 sm:text-lg">
-										Ensure good lighting conditions
-									</p>
-								</div>
-							</div>
-							<div className="flex items-start gap-3 sm:gap-4">
-								<div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[#16a34a] text-lg font-bold text-white sm:h-12 sm:w-12 sm:text-2xl">
-									3
-								</div>
-								<div className="min-w-0">
-									<p className="mb-1 text-base font-bold text-gray-900 sm:text-xl">
-										ပုံရှင်းလင်း ရိုက်ပါ
-									</p>
-									<p className="text-sm text-gray-600 sm:text-lg">
-										Keep the image clear and focused
-									</p>
-								</div>
-							</div>
-						</CardContent>
-					</Card>
+          <div className="space-y-2 text-center sm:space-y-3">
+            <h2 className="text-xl font-bold text-gray-900 sm:text-3xl">
+            အပင်ရောဂါပိုးကို စကင်ဖတ်ပါ
+            </h2>
+            <p className="text-base text-gray-600 sm:text-xl">Scan a Pest</p>
+          </div>
 
-					<Button
-						onClick={handleScan}
-						className="h-16 w-full max-w-lg gap-2 border-4 border-[#15803d] bg-[#16a34a] text-base font-bold hover:bg-[#15803d] sm:h-20 sm:gap-3 sm:text-2xl"
-					>
-						<Camera
-							className="size-6 shrink-0 sm:size-8"
-							strokeWidth={2.2}
-							aria-hidden
-						/>
-						ပိုးမွှားခွဲခြားရန် (Identify Pest)
-					</Button>
-					{error && <div className="text-red-600 font-bold mt-4">{error}</div>}
-				</div>
-			</div>
-		);
-	}
+          {/* Instructions */}
+          <Card className="w-full max-w-lg border-4 border-gray-300">
+            <CardContent className="space-y-4 p-4 sm:space-y-6 sm:p-6">
+              <div className="flex items-start gap-3 sm:gap-4">
+                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[#16a34a] text-lg font-bold text-white sm:h-12 sm:w-12 sm:text-2xl">
+                  1
+                </div>
+                <div className="min-w-0">
+                  <p className="mb-1 text-base font-bold text-gray-900 sm:text-xl">
+                    အပင်ရောဂါပိုးကို အနီးကပ်ရိုက်ပါ
+                  </p>
+                  <p className="text-sm text-gray-600 sm:text-lg">Take a close-up photo of the pest</p>
+                </div>
+              </div>
+              <div className="flex items-start gap-3 sm:gap-4">
+                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[#16a34a] text-lg font-bold text-white sm:h-12 sm:w-12 sm:text-2xl">
+                  2
+                </div>
+                <div className="min-w-0">
+                  <p className="mb-1 text-base font-bold text-gray-900 sm:text-xl">
+                    အလင်းရောင် လုံလောက်ပါစေ
+                  </p>
+                  <p className="text-sm text-gray-600 sm:text-lg">Ensure good lighting conditions</p>
+                </div>
+              </div>
+              <div className="flex items-start gap-3 sm:gap-4">
+                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[#16a34a] text-lg font-bold text-white sm:h-12 sm:w-12 sm:text-2xl">
+                  3
+                </div>
+                <div className="min-w-0">
+                  <p className="mb-1 text-base font-bold text-gray-900 sm:text-xl">ပုံရှင်းလင်း ရိုက်ပါ</p>
+                  <p className="text-sm text-gray-600 sm:text-lg">Keep the image clear and focused</p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
 
-	return (
-		<div className="fixed inset-0 z-50 bg-black">
-			{/* Camera Viewfinder */}
-			<div className="relative w-full h-full">
-				{/* Mock Camera Feed */}
-				<div className="absolute inset-0 bg-gradient-to-b from-gray-800 to-gray-900">
-					{/* Simple Grid Overlay */}
-					<div className="absolute inset-0 grid grid-cols-3 grid-rows-3 opacity-20">
-						{[...Array(9)].map((_, i) => (
-							<div key={i} className="border border-white" />
-						))}
-					</div>
+          <Button
+            onClick={handleScan}
+            className="h-16 w-full max-w-lg gap-2 border-4 border-[#15803d] bg-[#16a34a] text-base font-bold hover:bg-[#15803d] sm:h-20 sm:gap-3 sm:text-2xl"
+          >
+            <Camera className="size-6 shrink-0 sm:size-8" strokeWidth={2.2} aria-hidden />
+            အပင်ရောဂါပိုးခွဲခြားရန် (Identify Pest)
+          </Button>
+        </div>
+      </div>
+    );
+  }
 
 					{/* Large Focus Frame */}
 					<div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-72 h-72 border-8 border-[#16a34a] rounded-3xl">
@@ -199,15 +190,14 @@ export function PestClassifier() {
 					)}
 				</div>
 
-				{/* Top Close Button */}
-				<div className="absolute left-4 right-4 top-[max(0.75rem,env(safe-area-inset-top))] z-10 flex items-center justify-between sm:left-6 sm:right-6 sm:top-6">
-					<button
-						onClick={handleClose}
-						className="w-16 h-16 flex items-center justify-center bg-black/70 rounded-full text-white border-4 border-white active:scale-95 transition-transform"
-					>
-						<X className="w-8 h-8" strokeWidth={3} />
-					</button>
-				</div>
+          {/* Instruction Text */}
+          {!scanning && !result && (
+            <div className="absolute left-0 right-0 top-20 px-4 text-center text-white sm:top-24 sm:px-6">
+              <p className="mb-1 text-lg font-bold sm:mb-2 sm:text-2xl">အပင်ရောဂါပိုးကို ဘောင်အတွင်းထည့်ပါ</p>
+              <p className="text-sm sm:text-lg">Place pest inside the frame</p>
+            </div>
+          )}
+        </div>
 
 				{/* Scanning Overlay */}
 				{scanning && (
@@ -245,15 +235,10 @@ export function PestClassifier() {
 								<Bug className="size-24" strokeWidth={1.5} aria-hidden />
 							</div>
 
-							{/* Pest Name */}
-							<div className="mb-6 text-center sm:mb-8">
-								<h2 className="mb-1 text-2xl font-bold text-gray-900 sm:mb-2 sm:text-3xl">
-									{result.nameMM}
-								</h2>
-								<p className="text-base text-gray-600 sm:text-xl">
-									{result.name}
-								</p>
-							</div>
+              {/* Placeholder after scan — plant motif (affected crop context) */}
+              <div className="w-full h-48 bg-gradient-to-br from-gray-100 to-gray-200 rounded-2xl mb-6 flex items-center justify-center border-2 border-gray-300 text-[#1B4332]">
+                <Sprout className="size-24" strokeWidth={1.5} aria-hidden />
+              </div>
 
 							{/* Treatment Checklist - Simple 1-2-3 */}
 							<Card className="bg-[#FEF3C7] border-4 border-[#E67E22] mb-6">
@@ -306,21 +291,23 @@ export function PestClassifier() {
 									ဉာဏ်မျှဝေရေးတွင် စစ်ဆေးရန်
 								</Button>
 
-								<div className="grid grid-cols-2 gap-4">
-									<Button
-										onClick={handleRetake}
-										className="h-16 bg-white hover:bg-gray-100 text-[#16a34a] border-4 border-[#16a34a] text-lg font-bold"
-									>
-										ပြန်ရိုက်မည်
-									</Button>
-									<Button
-										onClick={handleClose}
-										className="h-16 bg-white hover:bg-gray-100 text-gray-700 border-4 border-gray-300 text-lg font-bold"
-									>
-										ပိတ်မည်
-									</Button>
-								</div>
-							</div>
+              {/* Action Buttons */}
+              <div className="space-y-4">
+                <div className="grid grid-cols-2 gap-4">
+                  <Button 
+                    onClick={handleRetake}
+                    className="h-16 bg-white hover:bg-gray-100 text-[#16a34a] border-4 border-[#16a34a] text-lg font-bold"
+                  >
+                    ပြန်ရိုက်မည်
+                  </Button>
+                  <Button 
+                    onClick={handleClose}
+                    className="h-16 bg-white hover:bg-gray-100 text-gray-700 border-4 border-gray-300 text-lg font-bold"
+                  >
+                    ပိတ်မည်
+                  </Button>
+                </div>
+              </div>
 
 							{/* Warning */}
 							<div className="mt-6 bg-[#FEF3C7] border-4 border-[#FDB813] rounded-xl p-4 flex gap-3 items-start">

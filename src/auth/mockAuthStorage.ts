@@ -8,17 +8,15 @@ export const DEMO_ADMIN_PHONES = new Set(["09900000001"]);
 
 /**
  * Pre-seeded mock admin (created on first app load if missing).
- * Sign in on the Login tab with these exact credentials.
+ * Register with this phone (digits only) to get an admin account in the demo.
  */
 export const MOCK_DEMO_ADMIN = {
   displayName: "Demo Admin",
   phone: "09900000001",
-  password: "admin123",
 } as const;
 
 /**
  * Ensures a demo admin row exists (and that this phone is always `admin`).
- * Does not change password if an account with this phone already exists.
  */
 export function ensureMockDemoAdmin(): void {
   const users = readUsers();
@@ -42,7 +40,7 @@ export function ensureMockDemoAdmin(): void {
       id,
       phone,
       displayName: MOCK_DEMO_ADMIN.displayName,
-      password: MOCK_DEMO_ADMIN.password,
+      password: "",
       role: "admin",
     },
   ]);
@@ -56,12 +54,12 @@ function migrateStoredUser(u: Record<string, unknown>): StoredUser | null {
   const id = u.id;
   const phone = u.phone;
   const displayName = u.displayName;
-  const password = u.password;
+  const password =
+    typeof u.password === "string" ? u.password : "";
   if (
     typeof id !== "string" ||
     typeof phone !== "string" ||
-    typeof displayName !== "string" ||
-    typeof password !== "string"
+    typeof displayName !== "string"
   ) {
     return null;
   }
@@ -126,16 +124,16 @@ export function isValidPhoneDigits(digits: string): boolean {
   return digits.length >= 8 && digits.length <= 15;
 }
 
+/** Returns true if a user row already exists for this phone (digits normalized). */
+export function isMockPhoneRegistered(phone: string): boolean {
+  const normalized = normalizePhone(phone);
+  if (!normalized) return false;
+  return readUsers().some((u) => u.phone === normalized);
+}
+
 /** Trim and collapse spaces; used with toLowerCase() for login matching. */
 export function normalizeDisplayName(name: string): string {
   return name.trim().replace(/\s+/g, " ");
-}
-
-export function displayNamesMatch(a: string, b: string): boolean {
-  return (
-    normalizeDisplayName(a).toLowerCase() ===
-    normalizeDisplayName(b).toLowerCase()
-  );
 }
 
 function repairSessionRole(session: AuthUser): AuthUser {
@@ -242,11 +240,7 @@ export function mockSetUserRole(
   }
 }
 
-export function mockSignUp(
-  displayName: string,
-  phone: string,
-  password: string
-): AuthUser {
+export function mockSignUp(displayName: string, phone: string): AuthUser {
   const nameClean = normalizeDisplayName(displayName);
   if (!nameClean) {
     throw new Error("INVALID_NAME");
@@ -254,9 +248,6 @@ export function mockSignUp(
   const normalized = normalizePhone(phone);
   if (!isValidPhoneDigits(normalized)) {
     throw new Error("INVALID_PHONE");
-  }
-  if (password.length < MIN_PASSWORD_LEN) {
-    throw new Error("WEAK_PASSWORD");
   }
   const users = readUsers();
   if (users.some((u) => u.phone === normalized)) {
@@ -271,7 +262,7 @@ export function mockSignUp(
     id,
     phone: normalized,
     displayName: nameClean,
-    password,
+    password: "",
     role,
   };
   writeUsers([...users, row]);
@@ -280,39 +271,6 @@ export function mockSignUp(
     phone: row.phone,
     displayName: row.displayName,
     role: row.role,
-  };
-  persistSession(session);
-  return session;
-}
-
-export function mockSignIn(
-  displayName: string,
-  phone: string,
-  password: string
-): AuthUser {
-  const nameClean = normalizeDisplayName(displayName);
-  if (!nameClean || !password) {
-    throw new Error("INVALID_CREDENTIALS");
-  }
-  const normalized = normalizePhone(phone);
-  if (!isValidPhoneDigits(normalized)) {
-    throw new Error("INVALID_CREDENTIALS");
-  }
-  const users = readUsers();
-  const match = users.find(
-    (u) =>
-      u.phone === normalized &&
-      displayNamesMatch(u.displayName, nameClean) &&
-      u.password === password
-  );
-  if (!match) {
-    throw new Error("INVALID_CREDENTIALS");
-  }
-  const session: AuthUser = {
-    id: match.id,
-    phone: match.phone,
-    displayName: match.displayName,
-    role: match.role,
   };
   persistSession(session);
   return session;
@@ -346,26 +304,6 @@ export function mockUpdateDisplayName(
   };
   persistSession(session);
   return session;
-}
-
-export function mockChangePassword(
-  userId: string,
-  currentPassword: string,
-  newPassword: string
-): void {
-  if (newPassword.length < MIN_PASSWORD_LEN) {
-    throw new Error("WEAK_PASSWORD");
-  }
-  const users = readUsers();
-  const idx = users.findIndex((u) => u.id === userId);
-  if (idx < 0) {
-    throw new Error("NOT_FOUND");
-  }
-  if (users[idx].password !== currentPassword) {
-    throw new Error("INVALID_CREDENTIALS");
-  }
-  users[idx] = { ...users[idx], password: newPassword };
-  writeUsers(users);
 }
 
 /** Clears mock users and session (full reset). Caller should also clear app prefs. */

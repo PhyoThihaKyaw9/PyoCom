@@ -12,9 +12,7 @@ import {
   clearMockAuthUsersAndSession,
   ensureMockDemoAdmin,
   getSessionUser,
-  mockChangePassword,
   mockSetUserRole,
-  mockSignIn,
   mockSignOut,
   mockSignUp,
   mockUpdateDisplayName,
@@ -23,19 +21,9 @@ import {
 type AuthContextValue = {
   user: AuthUser | null;
   ready: boolean;
-  signIn: (
-    displayName: string,
-    phone: string,
-    password: string
-  ) => Promise<AuthUser>;
-  signUp: (
-    displayName: string,
-    phone: string,
-    password: string
-  ) => Promise<AuthUser>;
+  signUp: (displayName: string, phone: string) => Promise<AuthUser>;
   signOut: () => void;
   updateDisplayName: (displayName: string) => Promise<AuthUser>;
-  changePassword: (currentPassword: string, newPassword: string) => Promise<void>;
   setUserRole: (targetUserId: string, role: UserRole) => Promise<void>;
   /** Removes all mock accounts and session. UI should call signOut after. */
   clearAllLocalAccounts: () => void;
@@ -53,18 +41,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setReady(true);
   }, []);
 
-  const signInFn = useCallback(
-    async (displayName: string, phone: string, password: string) => {
-      const session = mockSignIn(displayName, phone, password);
-      setUser(session);
-      return session;
-    },
-    []
-  );
-
   const signUpFn = useCallback(
-    async (displayName: string, phone: string, password: string) => {
-      const session = mockSignUp(displayName, phone, password);
+    async (displayName: string, phone: string) => {
+      const session = mockSignUp(displayName, phone);
       setUser(session);
       return session;
     },
@@ -84,16 +63,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setUser(session);
     return session;
   }, [user]);
-
-  const changePasswordFn = useCallback(
-    async (currentPassword: string, newPassword: string) => {
-      if (!user) {
-        throw new Error("NOT_FOUND");
-      }
-      mockChangePassword(user.id, currentPassword, newPassword);
-    },
-    [user]
-  );
 
   const setUserRoleFn = useCallback(
     async (targetUserId: string, role: UserRole) => {
@@ -116,22 +85,18 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     () => ({
       user,
       ready,
-      signIn: signInFn,
       signUp: signUpFn,
       signOut: signOutFn,
       updateDisplayName: updateDisplayNameFn,
-      changePassword: changePasswordFn,
       setUserRole: setUserRoleFn,
       clearAllLocalAccounts: clearAllLocalAccountsFn,
     }),
     [
       user,
       ready,
-      signInFn,
       signUpFn,
       signOutFn,
       updateDisplayNameFn,
-      changePasswordFn,
       setUserRoleFn,
       clearAllLocalAccountsFn,
     ]

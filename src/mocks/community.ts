@@ -103,7 +103,7 @@ export const MOCK_KNOWLEDGE_ARTICLES: KnowledgeArticle[] = [
     summaryEn:
       "This section shares planting information curated by admins.",
     bodyMM:
-      "ဤ 'ဉာဏ်မျှဝေရေး' အပိုင်းတွင် စိုက်ပျိုးရေးအတွက် လိုအပ်သည့်အချက်အလက်များကို Pyoe Com အက်မင် တာဝန်များက တင်ပြပါသည်။ လမ်းညွှန်ကတ်များနှင့် ယှဉ်လေ့လုံး၍ စိုက်ပျိုးရေးဆုံးဖြတ်ချက်များချပါ။ သင်ကြားရေးပို့စ်အသစ်များ ထပ်မံထည့်သွင်းပါက ဤစာရင်းအပေါ်တွင် ပေါ်လာပါလိမ့်မည်။",
+      "ဤ 'သုတမျှဝေရေး' အပိုင်းတွင် စိုက်ပျိုးရေးအတွက် လိုအပ်သည့်အချက်အလက်များကို Pyoe Com အက်မင် တာဝန်များက တင်ပြပါသည်။ လမ်းညွှန်ကတ်များနှင့် ယှဉ်လေ့လုံး၍ စိုက်ပျိုးရေးဆုံးဖြတ်ချက်များချပါ။ သင်ကြားရေးပို့စ်အသစ်များ ထပ်မံထည့်သွင်းပါက ဤစာရင်းအပေါ်တွင် ပေါ်လာပါလိမ့်မည်။",
     bodyEn:
       "The Knowledge tab is curated by Pyoe Com admins for reliable planting and farm management notes. Use it together with the Guide cards; new posts appear at the top when admins publish them.",
     attributionMM: "Pyoe Com အက်မင်",
